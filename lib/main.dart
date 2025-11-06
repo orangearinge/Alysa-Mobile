@@ -1,4 +1,7 @@
+import 'package:alysa_speak/pages/create_account.dart';
+import 'package:alysa_speak/pages/home_page.dart';
 import 'package:alysa_speak/pages/login_page.dart';
+import 'package:alysa_speak/pages/welcome_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -19,7 +22,10 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => const LoginPage(),
+        '/': (context) => const WelcomePage(),
+        '/login': (context) => const LoginPage(),
+        '/create': (context) => const CreateAccountPage(),
+        '/home': (context) => const HomePage(),
       },
     );
   }

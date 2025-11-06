@@ -1,96 +1,89 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final Color mainColor = const Color(0xFF944E63);
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              const SizedBox(height: 40),
+              
               // Title
               Text(
-                'Login here',
-                style: TextStyle(
+                "Login here",
+                style: GoogleFonts.poppins(
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
-                  color: mainColor,
+                  color: const Color(0xFF1565D8),
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
 
-              // Subtext
-              const Text(
+              // Subtitle
+              Text(
                 "Welcome back you’ve been missed!",
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: GoogleFonts.poppins(
                   fontSize: 14,
-                  fontWeight: FontWeight.w500,
                   color: Colors.black87,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 40),
 
-              // Email TextField
+              // Email field
               TextField(
                 decoration: InputDecoration(
-                  labelText: 'Email',
-                  labelStyle: TextStyle(color: mainColor),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: mainColor, width: 2),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+                  labelText: "Email",
+                  labelStyle: GoogleFonts.poppins(color: Colors.black54),
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: mainColor.withOpacity(0.4)),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Color(0xFF1565D8)),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Color(0xFF1565D8), width: 2),
                   ),
                 ),
               ),
               const SizedBox(height: 20),
 
-              // Password TextField
+              // Password field
               TextField(
                 obscureText: true,
                 decoration: InputDecoration(
-                  labelText: 'Password',
-                  labelStyle: const TextStyle(color: Colors.black54),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: mainColor, width: 2),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+                  labelText: "Password",
+                  labelStyle: GoogleFonts.poppins(color: Colors.black54),
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.black12),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Colors.grey),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Color(0xFF1565D8), width: 2),
                   ),
                 ),
               ),
 
               const SizedBox(height: 10),
 
-              // Forgot password
+              // Forgot password link
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () {},
                   child: Text(
-                    'Forgot your password?',
-                    style: TextStyle(
-                      color: mainColor,
+                    "Forgot your password?",
+                    style: GoogleFonts.poppins(
+                      color: const Color(0xFF1565D8),
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                     ),
@@ -100,80 +93,75 @@ class LoginPage extends StatelessWidget {
 
               const SizedBox(height: 10),
 
-              // Sign In Button
+              // Sign in button
               SizedBox(
                 width: double.infinity,
-                height: 48,
+                height: 50,
                 child: ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: mainColor,
+                    backgroundColor: const Color(0xFF1565D8),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    elevation: 4,
-                    shadowColor: mainColor.withOpacity(0.4),
+                    elevation: 3,
                   ),
-                  child: const Text(
-                    'Sign in',
-                    style: TextStyle(
+                  child: Text(
+                    "Sign in",
+                    style: GoogleFonts.poppins(
                       color: Colors.white,
                       fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
               ),
 
-              const SizedBox(height: 25),
+              const SizedBox(height: 20),
 
-              // Create account
+              // OR divider
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    "Create new account",
-                    style: TextStyle(fontSize: 14, color: Colors.black87),
+                  Expanded(child: Divider(color: Colors.grey[300], thickness: 1)),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text("or", style: GoogleFonts.poppins(color: Colors.grey)),
                   ),
+                  Expanded(child: Divider(color: Colors.grey[300], thickness: 1)),
                 ],
-              ),
-
-              const SizedBox(height: 30),
-
-              // Or continue with
-              const Text(
-                "Or continue with",
-                style: TextStyle(color: Colors.black54, fontSize: 13),
               ),
               const SizedBox(height: 20),
 
-              // Social Login Buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _socialButton(Icons.g_mobiledata),
-                  _socialButton(Icons.facebook),
-                  _socialButton(Icons.apple),
-                ],
+              // Google sign-in button
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: OutlinedButton.icon(
+                  onPressed: () {},
+                  icon: Image.network(
+                    'https://upload.wikimedia.org/wikipedia/commons/4/4e/Gmail_Icon.png',
+                    height: 22,
+                  ),
+                  label: Text(
+                    "Continue with Google",
+                    style: GoogleFonts.poppins(
+                      color: Colors.black87,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.grey),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  // Widget untuk tombol sosial media
-  Widget _socialButton(IconData icon) {
-    return Container(
-      width: 50,
-      height: 50,
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: Icon(icon, size: 22, color: Colors.black87),
     );
   }
 }
