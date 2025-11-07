@@ -3,6 +3,7 @@ import 'package:alysa_speak/pages/home_page.dart';
 import 'package:alysa_speak/pages/login_page.dart';
 import 'package:alysa_speak/pages/welcome_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:alysa_speak/theme/app_color.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Alysa App',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF944E63)),
+        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
         useMaterial3: true,
       ),
       initialRoute: '/',
