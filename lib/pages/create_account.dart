@@ -23,13 +23,13 @@ class CreateAccountPage extends StatelessWidget {
               children: [
                 // Judul
                 Text(
-                "Create Account",
-                style: GoogleFonts.poppins(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+                  "Create Account",
+                  style: GoogleFonts.poppins(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
                 ),
-              ),
                 const SizedBox(height: 10),
 
                 // Deskripsi
@@ -37,9 +37,9 @@ class CreateAccountPage extends StatelessWidget {
                   'Create an account so you can explore all the\nexisting jobs',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  color: AppColors.textDark,
-                  fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                    color: AppColors.textDark,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(height: 40),
@@ -53,12 +53,17 @@ class CreateAccountPage extends StatelessWidget {
                     filled: true,
                     fillColor: Colors.white,
                     focusedBorder: OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: AppColors.primary, width: 2),
+                      borderSide: BorderSide(
+                        color: AppColors.primary,
+                        width: 2,
+                      ),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: AppColors.primary, width: 2),
+                      borderSide: BorderSide(
+                        color: AppColors.primary,
+                        width: 2,
+                      ),
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
@@ -76,12 +81,17 @@ class CreateAccountPage extends StatelessWidget {
                     filled: true,
                     fillColor: Colors.white,
                     focusedBorder: OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: AppColors.primary, width: 2),
+                      borderSide: BorderSide(
+                        color: AppColors.primary,
+                        width: 2,
+                      ),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: AppColors.primary, width: 2),
+                      borderSide: BorderSide(
+                        color: AppColors.primary,
+                        width: 2,
+                      ),
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
@@ -98,12 +108,17 @@ class CreateAccountPage extends StatelessWidget {
                     filled: true,
                     fillColor: Colors.white,
                     focusedBorder: OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: AppColors.primary, width: 2),
+                      borderSide: BorderSide(
+                        color: AppColors.primary,
+                        width: 2,
+                      ),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: AppColors.primary, width: 2),
+                      borderSide: BorderSide(
+                        color: AppColors.primary,
+                        width: 2,
+                      ),
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
@@ -115,13 +130,7 @@ class CreateAccountPage extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      // Aksi: masuk ke homepage
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const HomePage(),
-                        ),
-                      );
+                      Navigator.pushNamed(context, '/home');
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
@@ -145,10 +154,7 @@ class CreateAccountPage extends StatelessWidget {
                 // Teks bawah
                 const Text(
                   'Already have an account',
-                  style: TextStyle(
-                    color: Colors.black54,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: Colors.black54, fontSize: 14),
                 ),
               ],
             ),

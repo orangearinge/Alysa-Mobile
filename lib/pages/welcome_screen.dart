@@ -26,7 +26,10 @@ class WelcomePage extends StatelessWidget {
             Positioned(
               top: 200,
               right: 20,
-              child: CircleAvatar(radius: 40, backgroundColor: AppColors.secondary),
+              child: CircleAvatar(
+                radius: 40,
+                backgroundColor: AppColors.secondary,
+              ),
             ),
             Positioned(
               bottom: 0,
@@ -80,12 +83,7 @@ class WelcomePage extends StatelessWidget {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const CreateAccountPage(),
-                          ),
-                        );
+                        Navigator.pushNamed(context, "/create");
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
@@ -116,12 +114,7 @@ class WelcomePage extends StatelessWidget {
                       ),
                       GestureDetector(
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const LoginPage(),
-                            ),
-                          );
+                          Navigator.pushNamed(context, '/login');
                         },
                         child: const Text(
                           'Log in',
