@@ -89,7 +89,7 @@ class _HomePageState extends State<HomePage> {
 
               // Illustration (pakai assets lokal)
               Center(
-                child: Image.asset('assets/images/homepage.png', height: 180),
+                child: Image.asset('assets/images/homepage.jpg', height: 180),
               ),
 
               const SizedBox(height: 24),
