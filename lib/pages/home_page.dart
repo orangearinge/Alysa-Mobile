@@ -11,7 +11,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   // Posisi default tetap di 0 (Home)
-  int _selectedIndex = 0; 
+  int _selectedIndex = 0;
 
   // Fungsi untuk mengubah halaman saat item di-tap
   void _onItemTapped(int index) {
@@ -61,9 +61,15 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(height: 30),
           // Illustration (pakai assets lokal)
           Center(
-            child: Image.asset('assets/images/homepage.jpg', height: 180,
+            child: Image.asset(
+              'assets/images/homepage.jpg',
+              height: 180,
               errorBuilder: (context, error, stackTrace) {
-                return Container(height: 180, color: Colors.grey[200], child: Center(child: Text("Image not found")));
+                return Container(
+                  height: 180,
+                  color: Colors.grey[200],
+                  child: Center(child: Text("Image not found")),
+                );
               },
             ),
           ),
@@ -72,11 +78,7 @@ class _HomePageState extends State<HomePage> {
           Text(
             "Explore all the existing job roles based on your\ninterest and study major",
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.black87,
-              fontSize: 14,
-              height: 1.4,
-            ),
+            style: TextStyle(color: Colors.black87, fontSize: 14, height: 1.4),
           ),
           const SizedBox(height: 32),
           // Button: LEARNING
@@ -136,17 +138,26 @@ class _HomePageState extends State<HomePage> {
   );
   // --- AKHIR KONTEN HALAMAN ANDA ---
 
-
   @override
   Widget build(BuildContext context) {
     // 2. Susun ulang daftar halaman (hanya 3 item)
     final List<Widget> _pages = [
       // 0: Home (Konten Anda)
-      _homePageBody, 
+      _homePageBody,
       // 1: Scan/Lens (Halaman placeholder untuk FAB)
-      const Center(child: Text("Halaman Scan", style: TextStyle(fontSize: 24, color: Colors.black))),
+      const Center(
+        child: Text(
+          "Halaman Scan",
+          style: TextStyle(fontSize: 24, color: Colors.black),
+        ),
+      ),
       // 2: Profile
-      const Center(child: Text("Halaman Profile", style: TextStyle(fontSize: 24, color: Colors.black))),
+      const Center(
+        child: Text(
+          "Halaman Profile",
+          style: TextStyle(fontSize: 24, color: Colors.black),
+        ),
+      ),
     ];
 
     return Scaffold(
@@ -161,7 +172,7 @@ class _HomePageState extends State<HomePage> {
         width: 75,
         child: FloatingActionButton(
           onPressed: _onFabTapped,
-          child: Icon(FontAwesomeIcons.camera, color: Colors.white), 
+          child: Icon(FontAwesomeIcons.camera, color: Colors.white),
           backgroundColor: AppColors.primary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(50),
@@ -180,28 +191,22 @@ class _HomePageState extends State<HomePage> {
           const CircleBorder(),
         ),
         color: AppColors.secondary,
-        notchMargin: 8.0, 
+        notchMargin: 8.0,
         clipBehavior: Clip.antiAlias,
         child: Container(
           height: 70, // Tinggi bar
           child: Row(
             // 3. MainAxisAlignment diubah ke spaceAround
             // Ini akan memberi jarak yang seimbang untuk 3 item
-            mainAxisAlignment: MainAxisAlignment.spaceAround, 
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
               // 4. Item navigasi sekarang hanya 3
-              
+
               // Item Kiri: Home
               _buildNavItem(
                 icon: FontAwesomeIcons.house, // Ikon Home
                 text: "Home",
                 index: 0,
-              ),
-              
-              // Item Tengah: Placeholder untuk FAB
-              _buildNavItem(
-                text: "Scan", 
-                index: 1,
               ),
 
               // Item Kanan: Profile
@@ -217,7 +222,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // WIDGET BANTUAN 
+  // WIDGET BANTUAN
   Widget _buildNavItem({
     IconData? icon, // Icon opsional
     required String text,
@@ -229,7 +234,8 @@ class _HomePageState extends State<HomePage> {
     // 5. Mengubah Expanded menjadi Flexible
     // Ini membuat item placeholder di tengah tidak memakan ruang
     // secara paksa, tapi item lain bisa membesar
-    return Flexible( // Diubah dari Expanded
+    return Flexible(
+      // Diubah dari Expanded
       fit: FlexFit.tight, // Memastikan item tetap rapi
       child: InkWell(
         onTap: () => _onItemTapped(index),
@@ -245,11 +251,13 @@ class _HomePageState extends State<HomePage> {
               width: 25,
               decoration: BoxDecoration(
                 // 6. Indikator di item tengah (FAB) dihilangkan
-                color: isSelected && index != 1 ? AppColors.primary : Colors.transparent,
+                color: isSelected && index != 1
+                    ? AppColors.primary
+                    : Colors.transparent,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            SizedBox(height: 6), 
+            SizedBox(height: 6),
 
             // IKON
             if (icon != null)
@@ -257,7 +265,7 @@ class _HomePageState extends State<HomePage> {
             else
               SizedBox(height: 22), // Placeholder seukuran ikon
 
-            SizedBox(height: 4), 
+            SizedBox(height: 4),
 
             // TEKS
             Text(
