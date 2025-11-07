@@ -1,3 +1,4 @@
+import 'package:alysa_speak/theme/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -76,7 +77,7 @@ class _HomePageState extends State<HomePage> {
                   Text(
                     "Dede Fernanda",
                     style: TextStyle(
-                      color: const Color(0xFF1565D8),
+                      color: AppColors.primary,
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
                     ),
