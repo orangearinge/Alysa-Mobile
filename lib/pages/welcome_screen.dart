@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'create_account.dart';
-import 'login_page.dart';
 import 'package:alysa_speak/theme/app_color.dart';
 
 class WelcomePage extends StatelessWidget {

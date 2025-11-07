@@ -1,4 +1,3 @@
-import 'package:alysa_speak/pages/learning_writing.dart';
 import 'package:alysa_speak/theme/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
