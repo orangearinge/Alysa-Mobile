@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'create_account.dart';
 import 'login_page.dart';
+import 'package:alysa_speak/theme/app_color.dart';
 
 class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});
@@ -8,7 +10,7 @@ class WelcomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Stack(
           children: [
@@ -18,25 +20,25 @@ class WelcomePage extends StatelessWidget {
               left: -30,
               child: CircleAvatar(
                 radius: 70,
-                backgroundColor: Colors.blue[100],
+                backgroundColor: AppColors.secondary,
               ),
             ),
             Positioned(
               top: 200,
               right: 20,
-              child: CircleAvatar(radius: 40, backgroundColor: Colors.blue[50]),
+              child: CircleAvatar(radius: 40, backgroundColor: AppColors.secondary),
             ),
             Positioned(
               bottom: 0,
               left: 0,
               right: 0,
               child: Container(
-                height: 280,
+                height: 450,
                 decoration: BoxDecoration(
-                  color: Colors.blue[50],
+                  color: AppColors.secondary,
                   borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(300),
-                    topRight: Radius.circular(300),
+                    topLeft: Radius.circular(100),
+                    topRight: Radius.circular(100),
                   ),
                 ),
               ),
@@ -48,30 +50,30 @@ class WelcomePage extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  const SizedBox(height: 80),
+                  const SizedBox(height: 60),
 
                   // Nama Aplikasi
                   Text(
                     'Alysa',
-                    style: TextStyle(
-                      color: Colors.blue[800],
-                      fontSize: 50,
+                    style: GoogleFonts.poppins(
+                      color: AppColors.primary,
+                      fontSize: 60,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 15),
+                  const SizedBox(height: 35),
 
                   // Deskripsi
                   const Text(
                     'Explore all the existing job roles based on your\ninterest and study major',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.black54,
+                      color: AppColors.textDark,
                       fontSize: 14,
                       height: 1.5,
                     ),
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 30),
 
                   // Tombol Create an Account
                   SizedBox(
@@ -86,9 +88,9 @@ class WelcomePage extends StatelessWidget {
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue[800],
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.textLight,
+                        padding: const EdgeInsets.symmetric(vertical: 20),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -110,7 +112,7 @@ class WelcomePage extends StatelessWidget {
                     children: [
                       const Text(
                         'Already have an account? ',
-                        style: TextStyle(color: Colors.black54),
+                        style: TextStyle(color: AppColors.textDark),
                       ),
                       GestureDetector(
                         onTap: () {
@@ -124,14 +126,14 @@ class WelcomePage extends StatelessWidget {
                         child: const Text(
                           'Log in',
                           style: TextStyle(
-                            color: Colors.blue,
+                            color: AppColors.primary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 70),
                 ],
               ),
             ),
