@@ -1,5 +1,3 @@
-import 'package:alysa_speak/pages/learning_page.dart';
-import 'package:alysa_speak/theme/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -11,8 +9,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 2; // posisi default "Home"
+  // Posisi default tetap di 0 (Home)
+  int _selectedIndex = 0; 
 
+  // Fungsi untuk mengubah halaman saat item di-tap
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -78,7 +78,7 @@ class _HomePageState extends State<HomePage> {
                   Text(
                     "Dede Fernanda",
                     style: TextStyle(
-                      color: AppColors.primary,
+                      color: const Color(0xFF1565D8),
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
                     ),
@@ -113,14 +113,7 @@ class _HomePageState extends State<HomePage> {
                 width: double.infinity,
                 height: 48,
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const LearningPage(),
-                      ),
-                    );
-                  },
+                  onPressed: () {},
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFE3EEFF),
                     elevation: 0,
