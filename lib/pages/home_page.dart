@@ -113,7 +113,9 @@ class _HomePageState extends State<HomePage> {
                 width: double.infinity,
                 height: 48,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/learning');
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFE3EEFF),
                     elevation: 0,
