@@ -67,7 +67,7 @@ class _HomePageState extends State<HomePage> {
                   const CircleAvatar(
                     radius: 25,
                     backgroundImage: NetworkImage(
-                      'https://cdn-icons-png.flaticon.com/512/4140/4140037.png', // contoh gambar
+                      'https://cdn-icons-png.flaticon.com/512/4140/4140037.png',
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -86,12 +86,9 @@ class _HomePageState extends State<HomePage> {
 
               const SizedBox(height: 30),
 
-              // Illustration (gunakan gambar dari assets atau URL)
+              // Illustration (pakai assets lokal)
               Center(
-                child: Image.network(
-                  'https://cdni.iconscout.com/illustration/premium/thumb/job-interview-illustration-download-in-svg-png-gif-file-formats--office-recruitment-human-resource-hr-flat-illustrations-4390844.png',
-                  height: 180,
-                ),
+                child: Image.asset('assets/images/homepage.png', height: 180),
               ),
 
               const SizedBox(height: 24),

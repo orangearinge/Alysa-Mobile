@@ -56,7 +56,7 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/Google.png
+    - assets/images/
 
   #   - images/a_dot_ham.jpeg
 
