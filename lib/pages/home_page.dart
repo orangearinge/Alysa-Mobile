@@ -62,6 +62,7 @@ class _HomePageState extends State<HomePage> {
           // Illustration (pakai assets lokal)
           Center(
             child: Image.asset(
+            
               'assets/images/homepage.jpg',
               height: 180,
               errorBuilder: (context, error, stackTrace) {

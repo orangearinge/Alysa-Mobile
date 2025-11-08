@@ -6,6 +6,7 @@ import 'package:alysa_speak/pages/level1.dart';
 import 'package:alysa_speak/pages/login_page.dart';
 import 'package:alysa_speak/pages/welcome_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:alysa_speak/theme/app_color.dart';
 
 void main() {
   runApp(const MyApp());
