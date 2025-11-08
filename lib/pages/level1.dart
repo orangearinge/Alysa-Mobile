@@ -21,75 +21,89 @@ class Level1 extends StatelessWidget {
         return FractionallySizedBox(
           heightFactor: 0.5,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+            padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment:
+                  MainAxisAlignment.spaceBetween, // ⬅️ kunci utama
               children: [
-                // garis kecil di atas popup
-                Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                // isi popup
-                const Row(
+                // Bagian atas (garis + teks)
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    FaIcon(
-                      FontAwesomeIcons.circleCheck,
-                      color: AppColors.primary,
-                      size: 22,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
                     ),
-                    SizedBox(width: 8),
-                    Text(
-                      'Kurang Tepat 🥺',
+                    const SizedBox(height: 32),
+                    const Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        FaIcon(
+                          FontAwesomeIcons.circleCheck,
+                          color: AppColors.primary,
+                          size: 22,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          'Kurang Tepat 🥺',
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Good sentence. Try using more variety next time.\n'
+                      '(Kalimat sudah benar, coba gunakan variasi lain di latihan berikutnya.)',
                       style: TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
+                        fontSize: 14,
+                        color: AppColors.textDark,
+                        height: 1.5,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Good sentence. Try using more variety next time.\n'
-                  '(Kalimat sudah benar, coba gunakan variasi lain di latihan berikutnya.)',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textDark,
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  height: 45,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+
+                // Bagian bawah (tombol)
+                Padding(
+                  padding: const EdgeInsets.only(
+                    bottom: 8,
+                  ), // sedikit jarak bawah
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 45,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
-                    ),
-                    child: const Text(
-                      'NEXT',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
+                      child: const Text(
+                        'NEXT',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
               ],
             ),
           ),
