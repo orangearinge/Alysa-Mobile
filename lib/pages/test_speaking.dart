@@ -19,7 +19,7 @@ class _TestSpeakingPageState extends State<TestSpeakingPage> {
     setState(() {
       _isRecording = !_isRecording;
     });
-    
+
     // TODO: Implement speech recognition logic here
     if (_isRecording) {
       print("Started recording...");
@@ -28,7 +28,7 @@ class _TestSpeakingPageState extends State<TestSpeakingPage> {
       print("Stopped recording...");
       // Stop recording and process
 
-    Future.delayed(Duration(milliseconds: 500), () {
+      Future.delayed(Duration(milliseconds: 500), () {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -143,15 +143,11 @@ class _TestSpeakingPageState extends State<TestSpeakingPage> {
                                     color: AppColors.primary.withOpacity(0.3),
                                     blurRadius: 20,
                                     spreadRadius: 5,
-                                  )
+                                  ),
                                 ]
                               : [],
                         ),
-                        child: Icon(
-                          Icons.mic,
-                          color: Colors.white,
-                          size: 50,
-                        ),
+                        child: Icon(Icons.mic, color: Colors.white, size: 50),
                       ),
                     ),
                     const SizedBox(height: 16),
