@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:alysa_speak/theme/app_color.dart';
 
-
 class HasilTestPage extends StatelessWidget {
   final int correctAnswers;
   final int wrongAnswers;
@@ -34,10 +33,7 @@ class HasilTestPage extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: Center(
-                  child: Text(
-                    "🎉",
-                    style: TextStyle(fontSize: 60),
-                  ),
+                  child: Text("🎉", style: TextStyle(fontSize: 60)),
                 ),
               ),
               const SizedBox(height: 32),
@@ -46,10 +42,7 @@ class HasilTestPage extends StatelessWidget {
               RichText(
                 textAlign: TextAlign.center,
                 text: TextSpan(
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                   children: [
                     TextSpan(
                       text: "Test\n",
@@ -128,11 +121,7 @@ class HasilTestPage extends StatelessWidget {
                       color: Colors.red.shade50,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(
-                      Icons.close,
-                      color: Colors.red,
-                      size: 20,
-                    ),
+                    child: Icon(Icons.close, color: Colors.red, size: 20),
                   ),
                   const SizedBox(width: 8),
                   Text(

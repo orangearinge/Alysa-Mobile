@@ -15,16 +15,16 @@ class Question {
   });
 }
 
-class Level1 extends StatefulWidget {
+class LearningWritingStart extends StatefulWidget {
   final int level;
 
-  const Level1({super.key, required this.level});
+  const LearningWritingStart({super.key, required this.level});
 
   @override
-  State<Level1> createState() => _Level1State();
+  State<LearningWritingStart> createState() => _LearningWritingStartState();
 }
 
-class _Level1State extends State<Level1> {
+class _LearningWritingStartState extends State<LearningWritingStart> {
   int currentQuestionIndex = 0;
 
   // Dummy questions data for all levels
