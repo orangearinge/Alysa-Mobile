@@ -114,7 +114,7 @@ class HasilTestPage extends StatelessWidget {
                   Text(
                     "$correctAnswers Correct  Answers",
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 11,
                       color: Colors.grey.shade700,
                       fontWeight: FontWeight.w500,
                     ),
@@ -138,7 +138,7 @@ class HasilTestPage extends StatelessWidget {
                   Text(
                     "$wrongAnswers Wrong Answers",
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 11,
                       color: Colors.grey.shade700,
                       fontWeight: FontWeight.w500,
                     ),
@@ -192,7 +192,7 @@ class HasilTestPage extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () {
                     // Navigate to home
-                    Navigator.popUntil(context, (route) => route.isFirst);
+                    Navigator.pushNamed(context, "/home");
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:alysa_speak/theme/app_color.dart';
+import 'hasil_test_page.dart';
 
 class TestSpeakingPage extends StatefulWidget {
   const TestSpeakingPage({super.key});
@@ -26,6 +27,19 @@ class _TestSpeakingPageState extends State<TestSpeakingPage> {
     } else {
       print("Stopped recording...");
       // Stop recording and process
+
+    Future.delayed(Duration(milliseconds: 500), () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HasilTestPage(
+              correctAnswers: 10,
+              wrongAnswers: 3,
+              totalPoints: 10,
+            ),
+          ),
+        );
+      });
     }
   }
 
