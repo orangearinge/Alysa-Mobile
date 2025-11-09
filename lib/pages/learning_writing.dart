@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class LearningWriting extends StatelessWidget {
+class LearningWriting extends StatefulWidget {
   const LearningWriting({super.key});
 
+  @override
+  State<LearningWriting> createState() => _LearningWritingState();
+}
+
+class _LearningWritingState extends State<LearningWriting> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

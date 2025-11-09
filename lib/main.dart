@@ -8,7 +8,6 @@ import 'package:alysa_speak/pages/start_test.dart';
 import 'package:alysa_speak/pages/welcome_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:alysa_speak/theme/app_color.dart';
-import 'package:alysa_speak/pages/start_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:alysa_speak/pages/test_writing.dart';
 import 'package:alysa_speak/pages/test_speaking.dart';

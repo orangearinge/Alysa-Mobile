@@ -10,7 +10,7 @@ class Level1 extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.secondary,
+      backgroundColor: AppColors.error,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(24),
@@ -47,7 +47,7 @@ class Level1 extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         FaIcon(
-                          FontAwesomeIcons.circleCheck,
+                          FontAwesomeIcons.circleXmark,
                           color: AppColors.primary,
                           size: 22,
                         ),
@@ -75,35 +75,60 @@ class Level1 extends StatelessWidget {
                   ],
                 ),
 
-                // Bagian bawah (tombol)
-                Padding(
-                  padding: const EdgeInsets.only(
-                    bottom: 8,
-                  ), // sedikit jarak bawah
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 45,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      height: 45,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.pop(context); // atau bisa reset field
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(
+                            color: AppColors.primary,
+                            width: 2,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
-                      ),
-                      child: const Text(
-                        'NEXT',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
+                        child: const Text(
+                          'TRY AGAIN',
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 45,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'NEXT',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ), // Bagian bawah (tombol)
               ],
             ),
           ),
@@ -135,7 +160,7 @@ class Level1 extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    'LEARNING WRITING',
+                    'LEARNING WRITING LEVEL 1',
                     style: TextStyle(
                       color: AppColors.primary,
                       fontSize: 18,
@@ -149,7 +174,7 @@ class Level1 extends StatelessWidget {
             ),
             const SizedBox(height: 32),
             const Text(
-              'Lesson 1',
+              'Question 1',
               style: TextStyle(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w600,
@@ -162,6 +187,31 @@ class Level1 extends StatelessWidget {
               style: TextStyle(fontSize: 15, color: Colors.black87),
             ),
             const Spacer(),
+
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: TextField(
+                maxLines: 1,
+                decoration: InputDecoration(
+                  hintText: "Type your Answer ...",
+                  hintStyle: TextStyle(
+                    color: Colors.grey.shade400,
+                    fontSize: 14,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
             SizedBox(
               width: double.infinity,
               height: 48,
