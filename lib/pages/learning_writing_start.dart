@@ -264,6 +264,7 @@ class _Level1State extends State<Level1> {
                     ),
                   ],
                 ),
+                
 
                 // Bagian bawah (tombol)
                 Padding(
@@ -384,6 +385,32 @@ class _Level1State extends State<Level1> {
               style: const TextStyle(fontSize: 15, color: Colors.black87),
             ),
             const Spacer(),
+
+            // Answer Input Field
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: TextField(
+                  maxLines: 1,
+                  decoration: InputDecoration(
+                    hintText: "Type your Answer ...",
+                    hintStyle: TextStyle(
+                      color: Colors.grey.shade400,
+                      fontSize: 14,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
             SizedBox(
               width: double.infinity,
               height: 48,

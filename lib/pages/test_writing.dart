@@ -136,9 +136,8 @@ class _TestWritingPageState extends State<TestWritingPage> {
                 child: ElevatedButton(
                   onPressed: () {
                     // Handle check answer
-                    Navigator.pushNamed(context, 'test_speaking');
-                    if (_answerController.text.isNotEmpty) {
-                      // Navigate to next question or show result
+                    if (mounted) {
+                      Navigator.pushNamed(context, '/test_speaking');
                     }
                   },
                   style: ElevatedButton.styleFrom(

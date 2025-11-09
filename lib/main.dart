@@ -41,8 +41,8 @@ class MyApp extends StatelessWidget {
         '/writing': (context) => const LearningWriting(),
         '/start_test': (context) => const StartTest(),
         '/test_writing': (context) => const TestWritingPage(),
-        'test_speaking': (context) => const TestSpeakingPage(),
-        'hasil_test': (context) => HasilTestPage(correctAnswers: 0),
+        '/test_speaking': (context) => const TestSpeakingPage(),
+        '/hasil_test': (context) => HasilTestPage(correctAnswers: 0),
       },
     );
   }
