@@ -1,6 +1,7 @@
 import 'package:alysa_speak/pages/create_account.dart';
 import 'package:alysa_speak/pages/home_page.dart';
 import 'package:alysa_speak/pages/learning_page.dart';
+import 'package:alysa_speak/pages/learning_speaking_level_choise.dart';
 import 'package:alysa_speak/pages/learning_writing_level_choice.dart';
 import 'package:alysa_speak/pages/login_page.dart';
 import 'package:alysa_speak/pages/start_test.dart';
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
         '/learning': (context) => const LearningPage(),
         '/learning-end': (context) => const HasilTestPage(),
         '/writing': (context) => const LearningWriting(),
+        '/speaking': (context) => const LearningSpeaking(),
         '/start_test': (context) => const StartTest(),
         '/test_writing': (context) => const TestWritingPage(),
         '/test_speaking': (context) => const TestSpeakingPage(),

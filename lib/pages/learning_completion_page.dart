@@ -1,14 +1,11 @@
+import 'package:alysa_speak/pages/learning_writing_start.dart';
 import 'package:flutter/material.dart';
 import 'package:alysa_speak/theme/app_color.dart';
-import 'learning_writing_start.dart';
 
 class LearningCompletionPage extends StatelessWidget {
   final int completedLevel;
-  
-  const LearningCompletionPage({
-    super.key,
-    required this.completedLevel,
-  });
+
+  const LearningCompletionPage({super.key, required this.completedLevel});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +18,7 @@ class LearningCompletionPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(),
-              
+
               // Celebration Icon
               Container(
                 width: 120,
@@ -31,15 +28,12 @@ class LearningCompletionPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(60),
                 ),
                 child: const Center(
-                  child: Text(
-                    '🎉',
-                    style: TextStyle(fontSize: 60),
-                  ),
+                  child: Text('🎉', style: TextStyle(fontSize: 60)),
                 ),
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Level Completed Text
               Text(
                 'Level $completedLevel',
@@ -49,9 +43,9 @@ class LearningCompletionPage extends StatelessWidget {
                   color: AppColors.primary,
                 ),
               ),
-              
+
               const SizedBox(height: 8),
-              
+
               const Text(
                 'Completed!',
                 style: TextStyle(
@@ -60,9 +54,9 @@ class LearningCompletionPage extends StatelessWidget {
                   color: Colors.black87,
                 ),
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Description Text
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
@@ -76,9 +70,9 @@ class LearningCompletionPage extends StatelessWidget {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 8),
-              
+
               const Text(
                 'Goodluck!',
                 style: TextStyle(
@@ -87,9 +81,9 @@ class LearningCompletionPage extends StatelessWidget {
                   color: AppColors.primary,
                 ),
               ),
-              
+
               const Spacer(),
-              
+
               // Buttons
               Column(
                 children: [
@@ -122,32 +116,38 @@ class LearningCompletionPage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // NEXT LEVEL Button
                   SizedBox(
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: completedLevel < 3 ? () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => Level1(level: completedLevel + 1),
-                          ),
-                        );
-                      } : null,
+                      onPressed: completedLevel < 3
+                          ? () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => LearningWritingStart(
+                                    level: completedLevel + 1,
+                                  ),
+                                ),
+                              );
+                            }
+                          : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: completedLevel < 3 
-                          ? AppColors.primary 
-                          : Colors.grey,
+                        backgroundColor: completedLevel < 3
+                            ? AppColors.primary
+                            : Colors.grey,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
                       child: Text(
-                        completedLevel < 3 ? 'NEXT LEVEL' : 'ALL LEVELS COMPLETED',
+                        completedLevel < 3
+                            ? 'NEXT LEVEL'
+                            : 'ALL LEVELS COMPLETED',
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -159,7 +159,7 @@ class LearningCompletionPage extends StatelessWidget {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 32),
             ],
           ),
@@ -168,4 +168,3 @@ class LearningCompletionPage extends StatelessWidget {
     );
   }
 }
-

@@ -51,7 +51,7 @@ class LearningWriting extends StatelessWidget {
             ),
             const SizedBox(height: 32),
             const Text(
-              'Lesson 1',
+              'Lesson',
               style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
             ),
             const SizedBox(height: 16),
@@ -67,11 +67,7 @@ class LearningWriting extends StatelessWidget {
     );
   }
 
-  Widget _buildLevelButton(
-    BuildContext context,
-    String text,
-    int level,
-  ) {
+  Widget _buildLevelButton(BuildContext context, String text, int level) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
@@ -79,7 +75,7 @@ class LearningWriting extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => Level1(level: level),
+              builder: (context) => LearningWritingStart(level: level),
             ),
           );
         },

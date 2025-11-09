@@ -1,14 +1,10 @@
+import 'package:alysa_speak/pages/learning_speaking_start.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class LearningWriting extends StatefulWidget {
-  const LearningWriting({super.key});
+class LearningSpeaking extends StatelessWidget {
+  const LearningSpeaking({super.key});
 
-  @override
-  State<LearningWriting> createState() => _LearningWritingState();
-}
-
-class _LearningWritingState extends State<LearningWriting> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,7 +28,7 @@ class _LearningWritingState extends State<LearningWriting> {
               child: Column(
                 children: [
                   Text(
-                    'LEARNING WRITING',
+                    'LEARNING SPEAKING',
                     style: TextStyle(
                       color: Color(0xFF1565C0),
                       fontSize: 18,
@@ -55,32 +51,33 @@ class _LearningWritingState extends State<LearningWriting> {
             ),
             const SizedBox(height: 32),
             const Text(
-              'Lesson 1',
+              'Lesson',
               style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
             ),
             const SizedBox(height: 16),
             // Level buttons
-            _buildLevelButton(context, 'LEVEL 1', '/level1_writing'),
+            _buildLevelButton(context, 'LEVEL 1', 1),
             const SizedBox(height: 12),
-            _buildLevelButton(context, 'LEVEL 2', '/level1_writing'),
+            _buildLevelButton(context, 'LEVEL 2', 2),
             const SizedBox(height: 12),
-            _buildLevelButton(context, 'LEVEL 3', '/level1_writing'),
+            _buildLevelButton(context, 'LEVEL 3', 3),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildLevelButton(
-    BuildContext context,
-    String text,
-    String? routeName,
-  ) {
+  Widget _buildLevelButton(BuildContext context, String text, int level) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
         onPressed: () {
-          Navigator.pushNamed(context, "${routeName ?? ''}");
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => LearningSpeakingStart(level: level),
+            ),
+          );
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFFDDE7FF),

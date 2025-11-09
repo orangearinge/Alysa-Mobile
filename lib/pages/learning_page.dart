@@ -63,12 +63,7 @@ class LearningPage extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      // Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(
-                      //     builder: (context) => const SpeakingPage(),
-                      //   ),
-                      // );
+                      Navigator.pushNamed(context, '/speaking');
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue[100],
@@ -94,9 +89,7 @@ class LearningPage extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.pushNamed(
-                        context, '/writing',
-                      );
+                      Navigator.pushNamed(context, '/writing');
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue[100],

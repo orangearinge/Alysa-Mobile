@@ -15,16 +15,16 @@ class Question {
   });
 }
 
-class LearningWritingStart extends StatefulWidget {
+class LearningSpeakingStart extends StatefulWidget {
   final int level;
 
-  const LearningWritingStart({super.key, required this.level});
+  const LearningSpeakingStart({super.key, required this.level});
 
   @override
-  State<LearningWritingStart> createState() => _LearningWritingStartState();
+  State<LearningSpeakingStart> createState() => _LearningSpeakingStart();
 }
 
-class _LearningWritingStartState extends State<LearningWritingStart> {
+class _LearningSpeakingStart extends State<LearningSpeakingStart> {
   int currentQuestionIndex = 0;
 
   // Dummy questions data for all levels
@@ -264,7 +264,6 @@ class _LearningWritingStartState extends State<LearningWritingStart> {
                     ),
                   ],
                 ),
-                
 
                 // Bagian bawah (tombol)
                 Padding(
@@ -340,7 +339,7 @@ class _LearningWritingStartState extends State<LearningWritingStart> {
               child: Column(
                 children: [
                   Text(
-                    'LEARNING WRITING',
+                    'LEARNING SPEAKING',
                     style: TextStyle(
                       color: AppColors.primary,
                       fontSize: 18,
@@ -385,32 +384,6 @@ class _LearningWritingStartState extends State<LearningWritingStart> {
               style: const TextStyle(fontSize: 15, color: Colors.black87),
             ),
             const Spacer(),
-
-            // Answer Input Field
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade300),
-                ),
-                child: TextField(
-                  maxLines: 1,
-                  decoration: InputDecoration(
-                    hintText: "Type your Answer ...",
-                    hintStyle: TextStyle(
-                      color: Colors.grey.shade400,
-                      fontSize: 14,
-                    ),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-
             SizedBox(
               width: double.infinity,
               height: 48,
