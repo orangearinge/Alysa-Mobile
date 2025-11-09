@@ -26,6 +26,36 @@ class LearningSpeakingStart extends StatefulWidget {
 
 class _LearningSpeakingStart extends State<LearningSpeakingStart> {
   int currentQuestionIndex = 0;
+  bool _isRecording = false;
+
+  void _toggleRecording() {
+    setState(() {
+      _isRecording = !_isRecording;
+    });
+
+    // TODO: Implement speech recognition logic here
+    if (_isRecording) {
+      print("Started recording...");
+      // Start recording
+    } else {
+      print("Stopped recording...");
+      // Stop recording and process
+
+      Future.delayed(Duration(milliseconds: 500), () {
+        // Navigator.pushReplacement(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (context) => HasilTestPage(
+        //       correctAnswers: 10,
+        //       wrongAnswers: 3,
+        //       totalPoints: 10,
+        //     ),
+        //   ),
+        // );
+        _showResultPopup(context);
+      });
+    }
+  }
 
   // Dummy questions data for all levels
   final Map<int, List<Question>> questionsData = {
@@ -384,28 +414,43 @@ class _LearningSpeakingStart extends State<LearningSpeakingStart> {
               style: const TextStyle(fontSize: 15, color: Colors.black87),
             ),
             const Spacer(),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: () => _showResultPopup(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+
+            Center(
+              child: Column(
+                children: [
+                  GestureDetector(
+                    onTap: _toggleRecording,
+                    child: Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        shape: BoxShape.circle,
+                        boxShadow: _isRecording
+                            ? [
+                                BoxShadow(
+                                  color: AppColors.primary.withOpacity(0.3),
+                                  blurRadius: 20,
+                                  spreadRadius: 5,
+                                ),
+                              ]
+                            : [],
+                      ),
+                      child: Icon(Icons.mic, color: Colors.white, size: 50),
+                    ),
                   ),
-                ),
-                child: const Text(
-                  'SUBMIT',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
+                  const SizedBox(height: 16),
+                  Text(
+                    _isRecording ? "Recording..." : "Tap to Speak",
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
-            const SizedBox(height: 24),
           ],
         ),
       ),
