@@ -23,7 +23,7 @@ class StartTest extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
             children: [
-              const Spacer(flex: 2),
+              const SizedBox(height: 20),
               
               // Title
               RichText(
@@ -75,31 +75,193 @@ class StartTest extends StatelessWidget {
               
               const SizedBox(height: 40),
               
-              // Description Text
+              // Description Text - Updated
               RichText(
                 textAlign: TextAlign.center,
                 text: const TextSpan(
                   style: TextStyle(
-                    fontSize: 16,
-                    height: 1.5,
+                    fontSize: 15,
+                    height: 1.6,
                     color: Color(0xFF4A5568),
                   ),
                   children: [
                     TextSpan(
-                      text: 'Gear up for a quick quiz! You\'ve got just and 30 seconds per question. Tap the info icon at the top right to check out the module each question comes from. Let\'s see what you\'ve got! - ',
+                      text: 'Get ready for an exciting challenge! 🎯\n\n',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
                     ),
                     TextSpan(
-                      text: 'Goodluck!',
+                      text: 'You\'ll face ',
+                    ),
+                    TextSpan(
+                      text: '10 questions',
                       style: TextStyle(
                         color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextSpan(
+                      text: ' with a mix of ',
+                    ),
+                    TextSpan(
+                      text: 'writing',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextSpan(
+                      text: ' and ',
+                    ),
+                    TextSpan(
+                      text: 'speaking',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextSpan(
+                      text: ' challenges. Each question has a ',
+                    ),
+                    TextSpan(
+                      text: '30-second',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextSpan(
+                      text: ' time limit, so think fast! ⏱️\n\n',
+                    ),
+                    TextSpan(
+                      text: 'Show us what you\'ve learned and earn points! ',
+                    ),
+                    TextSpan(
+                      text: 'Good luck! 🚀',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
               ),
               
-              const Spacer(flex: 3),
+              const Spacer(),
+              
+              // Info Cards
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.quiz_outlined,
+                            color: AppColors.primary,
+                            size: 28,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '10',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                          Text(
+                            'Questions',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.timer_outlined,
+                            color: AppColors.primary,
+                            size: 28,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '30s',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                          Text(
+                            'Per Question',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.extension_outlined,
+                            color: AppColors.primary,
+                            size: 28,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Mixed',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                          Text(
+                            'Type',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              
+              const SizedBox(height: 24),
               
               // Start Test Button
               SizedBox(
@@ -107,7 +269,7 @@ class StartTest extends StatelessWidget {
                 height: 56,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, '/test_writing');
+                    Navigator.pushNamed(context, '/soal_test');
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,

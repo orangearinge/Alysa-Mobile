@@ -8,10 +8,8 @@ import 'package:alysa_speak/pages/start_test.dart';
 import 'package:alysa_speak/pages/welcome_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:alysa_speak/theme/app_color.dart';
-
+import 'package:alysa_speak/pages/test_mix_page.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:alysa_speak/pages/test_writing.dart';
-import 'package:alysa_speak/pages/test_speaking.dart';
 import 'package:alysa_speak/pages/hasil_test_page.dart';
 
 void main() {
@@ -42,8 +40,7 @@ class MyApp extends StatelessWidget {
         '/writing': (context) => const LearningWriting(),
         '/speaking': (context) => const LearningSpeaking(),
         '/start_test': (context) => const StartTest(),
-        '/test_writing': (context) => const TestWritingPage(),
-        '/test_speaking': (context) => const TestSpeakingPage(),
+        '/soal_test' : (context) => const TestMixedPage(),
         '/hasil_test': (context) => HasilTestPage(correctAnswers: 0),
       },
     );

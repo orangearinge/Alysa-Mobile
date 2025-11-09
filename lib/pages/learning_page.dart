@@ -66,7 +66,7 @@ class LearningPage extends StatelessWidget {
                       Navigator.pushNamed(context, '/speaking');
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue[100],
+                      backgroundColor: AppColors.secondary,
                       foregroundColor: AppColors.primary,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
@@ -92,7 +92,7 @@ class LearningPage extends StatelessWidget {
                       Navigator.pushNamed(context, '/writing');
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue[100],
+                      backgroundColor: AppColors.secondary,
                       foregroundColor: AppColors.primary,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(

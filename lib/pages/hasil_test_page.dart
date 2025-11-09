@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
+import 'test_review_page.dart';
 import 'package:alysa_speak/theme/app_color.dart';
+
 
 class HasilTestPage extends StatelessWidget {
   final int correctAnswers;
   final int wrongAnswers;
   final int totalPoints;
+  final List<dynamic>? questions; // List soal untuk review
 
   const HasilTestPage({
     super.key,
     this.correctAnswers = 10,
     this.wrongAnswers = 3,
     this.totalPoints = 10,
+    this.questions,
   });
 
   @override
@@ -33,7 +37,10 @@ class HasilTestPage extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: Center(
-                  child: Text("🎉", style: TextStyle(fontSize: 60)),
+                  child: Text(
+                    "🎉",
+                    style: TextStyle(fontSize: 60),
+                  ),
                 ),
               ),
               const SizedBox(height: 32),
@@ -42,7 +49,10 @@ class HasilTestPage extends StatelessWidget {
               RichText(
                 textAlign: TextAlign.center,
                 text: TextSpan(
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                  ),
                   children: [
                     TextSpan(
                       text: "Test\n",
@@ -121,7 +131,11 @@ class HasilTestPage extends StatelessWidget {
                       color: Colors.red.shade50,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.close, color: Colors.red, size: 20),
+                    child: Icon(
+                      Icons.close,
+                      color: Colors.red,
+                      size: 20,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -153,7 +167,17 @@ class HasilTestPage extends StatelessWidget {
                 height: 56,
                 child: OutlinedButton(
                   onPressed: () {
-                    // Navigate to detailed result
+                    // Navigate to review page
+                    if (questions != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TestReviewPage(
+                            questions: questions!,
+                          ),
+                        ),
+                      );
+                    }
                   },
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: AppColors.primary, width: 2),
@@ -181,7 +205,7 @@ class HasilTestPage extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () {
                     // Navigate to home
-                    Navigator.pushNamed(context, "/home");
+                    Navigator.popUntil(context, (route) => route.isFirst);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
