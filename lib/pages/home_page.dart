@@ -27,11 +27,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> _pages = [
-      _HomeContent(),
-      ScanPage(),
-      ProfilePage(),
-    ];
+    final List<Widget> _pages = [_HomeContent(), ScanPage(), ProfilePage()];
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -149,11 +145,7 @@ class _HomeContent extends StatelessWidget {
                   CircleAvatar(
                     radius: 28,
                     backgroundColor: AppColors.primary,
-                    child: Icon(
-                      Icons.person,
-                      color: Colors.white,
-                      size: 32,
-                    ),
+                    child: Icon(Icons.person, color: Colors.white, size: 32),
                   ),
                   const SizedBox(width: 12),
                   Text(
@@ -301,10 +293,7 @@ class _HomeContent extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Center(
-                            child: Text(
-                              "🍪",
-                              style: TextStyle(fontSize: 24),
-                            ),
+                            child: Text("🍪", style: TextStyle(fontSize: 24)),
                           ),
                         ),
                         const SizedBox(width: 16),
