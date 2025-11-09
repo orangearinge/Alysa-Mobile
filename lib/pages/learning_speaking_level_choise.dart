@@ -1,9 +1,9 @@
+import 'package:alysa_speak/pages/learning_speaking_start.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'learning_writing_start.dart';
 
-class LearningWriting extends StatelessWidget {
-  const LearningWriting({super.key});
+class LearningSpeaking extends StatelessWidget {
+  const LearningSpeaking({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class LearningWriting extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    'LEARNING WRITING',
+                    'LEARNING SPEAKING',
                     style: TextStyle(
                       color: Color(0xFF1565C0),
                       fontSize: 18,
@@ -75,7 +75,7 @@ class LearningWriting extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => LearningWritingStart(level: level),
+              builder: (context) => LearningSpeakingStart(level: level),
             ),
           );
         },
