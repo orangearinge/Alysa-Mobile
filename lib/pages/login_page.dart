@@ -2,8 +2,39 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:alysa_speak/theme/app_color.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  String? errorMessage;
+
+  void validateAndLogin() {
+    final email = emailController.text.trim();
+    final pass = passwordController.text.trim();
+
+    setState(() => errorMessage = null);
+
+    if (email.isEmpty || pass.isEmpty) {
+      setState(() => errorMessage = "Please fill in all fields");
+      return;
+    }
+
+    Navigator.pushNamed(context, '/home');
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +73,7 @@ class LoginPage extends StatelessWidget {
 
               // Email field
               TextField(
+                controller: emailController,
                 decoration: InputDecoration(
                   labelText: "Email",
                   labelStyle: GoogleFonts.poppins(color: Colors.black54),
@@ -65,6 +97,7 @@ class LoginPage extends StatelessWidget {
 
               // Password field
               TextField(
+                controller: passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: "Password",
@@ -88,7 +121,15 @@ class LoginPage extends StatelessWidget {
 
               const SizedBox(height: 10),
 
-              // Forgot password link
+              // Error message
+              if (errorMessage != null)
+                Text(
+                  errorMessage!,
+                  style: const TextStyle(color: Colors.red, fontSize: 14),
+                ),
+
+              const SizedBox(height: 10),
+
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
@@ -111,11 +152,7 @@ class LoginPage extends StatelessWidget {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(
-                      context, '/home',
-                    );
-                  },
+                  onPressed: validateAndLogin,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(

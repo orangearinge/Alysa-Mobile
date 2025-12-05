@@ -2,15 +2,50 @@ import 'package:flutter/material.dart';
 import 'package:alysa_speak/theme/app_color.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class CreateAccountPage extends StatelessWidget {
+class CreateAccountPage extends StatefulWidget {
   const CreateAccountPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final emailController = TextEditingController();
-    final passwordController = TextEditingController();
-    final confirmPasswordController = TextEditingController();
+  State<CreateAccountPage> createState() => _CreateAccountPageState();
+}
 
+class _CreateAccountPageState extends State<CreateAccountPage> {
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+
+  String? errorMessage;
+
+  void validateAndSubmit() {
+    final email = emailController.text.trim();
+    final pass = passwordController.text.trim();
+    final confirmPass = confirmPasswordController.text.trim();
+
+    setState(() => errorMessage = null);
+
+    if (email.isEmpty || pass.isEmpty || confirmPass.isEmpty) {
+      setState(() => errorMessage = "Please fill in all fields");
+      return;
+    }
+
+    if (pass != confirmPass) {
+      setState(() => errorMessage = "Password and confirm password do not match");
+      return;
+    }
+
+    Navigator.pushNamed(context, '/home');
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -52,17 +87,11 @@ class CreateAccountPage extends StatelessWidget {
                     filled: true,
                     fillColor: Colors.white,
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: AppColors.primary,
-                        width: 2,
-                      ),
+                      borderSide: BorderSide(color: AppColors.primary, width: 2),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: AppColors.primary,
-                        width: 2,
-                      ),
+                      borderSide: BorderSide(color: AppColors.primary, width: 2),
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
@@ -80,17 +109,11 @@ class CreateAccountPage extends StatelessWidget {
                     filled: true,
                     fillColor: Colors.white,
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: AppColors.primary,
-                        width: 2,
-                      ),
+                      borderSide: BorderSide(color: AppColors.primary, width: 2),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: AppColors.primary,
-                        width: 2,
-                      ),
+                      borderSide: BorderSide(color: AppColors.primary, width: 2),
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
@@ -107,48 +130,51 @@ class CreateAccountPage extends StatelessWidget {
                     filled: true,
                     fillColor: Colors.white,
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: AppColors.primary,
-                        width: 2,
-                      ),
+                      borderSide: BorderSide(color: AppColors.primary, width: 2),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: AppColors.primary,
-                        width: 2,
-                      ),
+                      borderSide: BorderSide(color: AppColors.primary, width: 2),
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                 ),
+                const SizedBox(height: 10),
+
+                // Pesan error
+                if (errorMessage != null)
+                  Text(
+                    errorMessage!,
+                    style: const TextStyle(color: Colors.red, fontSize: 14),
+                  ),
+
                 const SizedBox(height: 40),
 
                 // Tombol Sign Up
                 SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/home');
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: validateAndSubmit,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Text(
-                      'Sign up',
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    elevation: 3,
+                  ),
+                  child: Text(
+                    "Sign Up",
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+              ),
+
+              const SizedBox(height: 20),
 
                 // Teks bawah
                 const Text(
