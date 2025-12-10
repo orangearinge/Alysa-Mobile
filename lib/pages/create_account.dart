@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:alysa_speak/theme/app_color.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:alysa_speak/services/auth_service.dart';
 
 class CreateAccountPage extends StatefulWidget {
   const CreateAccountPage({super.key});
@@ -14,9 +15,11 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
+  final AuthService _authService = AuthService();
+  bool _isLoading = false;
   String? errorMessage;
 
-  void validateAndSubmit() {
+  void validateAndSubmit() async {
     final email = emailController.text.trim();
     final pass = passwordController.text.trim();
     final confirmPass = confirmPasswordController.text.trim();
@@ -35,7 +38,18 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
       return;
     }
 
-    Navigator.pushNamed(context, '/home');
+    setState(() => _isLoading = true);
+
+    try {
+      await _authService.signUpWithEmailAndPassword(email, pass);
+      if (mounted) {
+        Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+      }
+    } catch (e) {
+      setState(() => errorMessage = e.toString());
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -182,16 +196,19 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                       ),
                       elevation: 3,
                     ),
-                    child: Text(
-                      "Sign Up",
-                      style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                    child: _isLoading
+                        ? const Center(
+                            child: CircularProgressIndicator(color: Colors.white))
+                        : Text(
+                            "Sign Up",
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                   ),
-                ),
+                ),  
 
                 const SizedBox(height: 20),
 

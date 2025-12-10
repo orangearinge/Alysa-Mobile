@@ -1,4 +1,7 @@
 import 'package:alysa_speak/pages/create_account.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:alysa_speak/firebase_options.dart';
 import 'package:alysa_speak/pages/home_page.dart';
 import 'package:alysa_speak/pages/learning_page.dart';
 import 'package:alysa_speak/pages/learning_speaking_level_choise.dart';
@@ -12,7 +15,11 @@ import 'package:alysa_speak/pages/test_mix_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:alysa_speak/pages/hasil_test_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
@@ -29,9 +36,11 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
         useMaterial3: true,
       ),
-      initialRoute: '/',
+      // Remove initialRoute and use home for AuthGate
+      home: const AuthGate(),
       routes: {
-        '/': (context) => const WelcomePage(),
+        // '/': (context) => const WelcomePage(), // Managed by AuthGate
+        '/welcome': (context) => const WelcomePage(),
         '/login': (context) => const LoginPage(),
         '/create': (context) => const CreateAccountPage(),
         '/home': (context) => const HomePage(),
@@ -40,8 +49,30 @@ class MyApp extends StatelessWidget {
         '/writing': (context) => const LearningWriting(),
         '/speaking': (context) => const LearningSpeaking(),
         '/start_test': (context) => const StartTest(),
-        '/soal_test' : (context) => const TestMixedPage(),
+        '/soal_test': (context) => const TestMixedPage(),
         '/hasil_test': (context) => HasilTestPage(correctAnswers: 0),
+      },
+    );
+  }
+}
+
+class AuthGate extends StatelessWidget {
+  const AuthGate({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (snapshot.hasData) {
+          return const HomePage();
+        }
+        return const WelcomePage();
       },
     );
   }

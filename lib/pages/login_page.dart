@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:alysa_speak/theme/app_color.dart';
+import 'package:alysa_speak/services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,20 +15,49 @@ class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
+  final AuthService _authService = AuthService();
+  bool _isLoading = false;
   String? errorMessage;
 
-  void validateAndLogin() {
+  void validateAndLogin() async {
     final email = emailController.text.trim();
     final pass = passwordController.text.trim();
 
-    setState(() => errorMessage = null);
+    setState(() {
+      errorMessage = null;
+    });
 
     if (email.isEmpty || pass.isEmpty) {
       setState(() => errorMessage = "Please fill in all fields");
       return;
     }
 
-    Navigator.pushNamed(context, '/home');
+    setState(() => _isLoading = true);
+
+    try {
+      await _authService.signInWithEmailAndPassword(email, pass);
+      if (mounted) {
+        Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+      }
+    } catch (e) {
+      setState(() => errorMessage = e.toString());
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _handleGoogleSignIn() async {
+    setState(() => _isLoading = true);
+    try {
+      await _authService.signInWithGoogle();
+      if (mounted) {
+        Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+      }
+    } catch (e) {
+      setState(() => errorMessage = e.toString());
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -152,7 +183,7 @@ class _LoginPageState extends State<LoginPage> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: validateAndLogin,
+                  onPressed: _isLoading ? null : validateAndLogin,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(
@@ -160,14 +191,16 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     elevation: 3,
                   ),
-                  child: Text(
-                    "Sign in",
-                    style: GoogleFonts.poppins(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : Text(
+                          "Sign in",
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                 ),
               ),
 
@@ -198,7 +231,7 @@ class _LoginPageState extends State<LoginPage> {
                 width: double.infinity,
                 height: 50,
                 child: OutlinedButton.icon(
-                  onPressed: () {},
+                  onPressed: _isLoading ? null : _handleGoogleSignIn,
                   icon: Image.asset(
                     'assets/images/Google.png',
                     width: 40,

@@ -1,11 +1,16 @@
 import 'package:alysa_speak/theme/app_color.dart';
 import 'package:flutter/material.dart';
+import 'package:alysa_speak/services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final AuthService authService = AuthService();
+    final User? user = authService.currentUser;
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
@@ -16,12 +21,17 @@ class ProfilePage extends StatelessWidget {
             CircleAvatar(
               radius: 50,
               backgroundColor: AppColors.primary,
-              child: Icon(Icons.person, color: Colors.white, size: 60),
+              backgroundImage: user?.photoURL != null
+                  ? NetworkImage(user!.photoURL!)
+                  : null,
+              child: user?.photoURL == null
+                  ? const Icon(Icons.person, color: Colors.white, size: 60)
+                  : null,
             ),
             const SizedBox(height: 16),
             // Name
             Text(
-              "Dede Fernanda",
+              user?.displayName ?? "User",
               style: TextStyle(
                 color: AppColors.primary,
                 fontWeight: FontWeight.bold,
@@ -31,7 +41,7 @@ class ProfilePage extends StatelessWidget {
             const SizedBox(height: 4),
             // Email
             Text(
-              "myname@gmail.com",
+              user?.email ?? "No Email",
               style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
             ),
             const SizedBox(height: 16),
@@ -50,9 +60,10 @@ class ProfilePage extends StatelessWidget {
                         child: Text("Cancel"),
                       ),
                       TextButton(
-                        onPressed: () {
+                        onPressed: () async {
                           // Perform logout
                           Navigator.pop(context);
+                          await authService.signOut();
                         },
                         child: Text(
                           "Logout",

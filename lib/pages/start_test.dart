@@ -24,14 +24,11 @@ class StartTest extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 20),
-              
+
               // Title
               RichText(
                 text: const TextSpan(
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                   children: [
                     TextSpan(
                       text: 'Ready for a ',
@@ -48,9 +45,9 @@ class StartTest extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 40),
-              
+
               // Illustration
               Image.asset(
                 'assets/images/homepage.jpg',
@@ -72,9 +69,9 @@ class StartTest extends StatelessWidget {
                   );
                 },
               ),
-              
+
               const SizedBox(height: 40),
-              
+
               // Description Text - Updated
               RichText(
                 textAlign: TextAlign.center,
@@ -92,9 +89,7 @@ class StartTest extends StatelessWidget {
                         color: Colors.black87,
                       ),
                     ),
-                    TextSpan(
-                      text: 'You\'ll face ',
-                    ),
+                    TextSpan(text: 'You\'ll face '),
                     TextSpan(
                       text: '10 questions',
                       style: TextStyle(
@@ -102,9 +97,7 @@ class StartTest extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    TextSpan(
-                      text: ' with a mix of ',
-                    ),
+                    TextSpan(text: ' with a mix of '),
                     TextSpan(
                       text: 'writing',
                       style: TextStyle(
@@ -112,9 +105,7 @@ class StartTest extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    TextSpan(
-                      text: ' and ',
-                    ),
+                    TextSpan(text: ' and '),
                     TextSpan(
                       text: 'speaking',
                       style: TextStyle(
@@ -122,9 +113,7 @@ class StartTest extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    TextSpan(
-                      text: ' challenges. Each question has a ',
-                    ),
+                    TextSpan(text: ' challenges. Each question has a '),
                     TextSpan(
                       text: '30-second',
                       style: TextStyle(
@@ -132,9 +121,7 @@ class StartTest extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    TextSpan(
-                      text: ' time limit, so think fast! ⏱️\n\n',
-                    ),
+                    TextSpan(text: ' time limit, so think fast! ⏱️\n\n'),
                     TextSpan(
                       text: 'Show us what you\'ve learned and earn points! ',
                     ),
@@ -148,9 +135,9 @@ class StartTest extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               const Spacer(),
-              
+
               // Info Cards
               Row(
                 children: [
@@ -260,9 +247,9 @@ class StartTest extends StatelessWidget {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Start Test Button
               SizedBox(
                 width: double.infinity,
@@ -289,7 +276,7 @@ class StartTest extends StatelessWidget {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 40),
             ],
           ),

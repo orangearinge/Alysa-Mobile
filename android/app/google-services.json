@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "118779504369",
+    "project_id": "liquid-virtue-406311",
+    "storage_bucket": "liquid-virtue-406311.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:118779504369:android:5b117efef72efe19c66b50",
+        "android_client_info": {
+          "package_name": "com.example.alysa_speak"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "118779504369-rpmhn6ah5p6j6g96598bpmoma9af50bd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwOmOfCxYXPffIwoH1QloeG5nsTg_WNVM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "118779504369-e7lhc8je74bcl7ivqvrhv66hteat6nkg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
