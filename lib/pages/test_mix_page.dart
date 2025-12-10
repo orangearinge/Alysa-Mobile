@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:alysa_speak/theme/app_color.dart';
 import 'hasil_test_page.dart';
 

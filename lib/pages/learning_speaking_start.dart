@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:alysa_speak/theme/app_color.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'learning_completion_page.dart';
 
 class Question {
@@ -26,32 +27,47 @@ class LearningSpeakingStart extends StatefulWidget {
 
 class _LearningSpeakingStart extends State<LearningSpeakingStart> {
   int currentQuestionIndex = 0;
+
+  // Speech to Text
+  late stt.SpeechToText _speech;
   bool _isRecording = false;
+  String spokenText = "";
 
-  void _toggleRecording() {
-    setState(() {
-      _isRecording = !_isRecording;
-    });
+  @override
+  void initState() {
+    super.initState();
+    _speech = stt.SpeechToText();
+  }
 
-    // TODO: Implement speech recognition logic here
-    if (_isRecording) {
-      print("Started recording...");
-      // Start recording
+  // START & STOP RECORDING
+  void _toggleRecording() async {
+    if (!_isRecording) {
+      bool available = await _speech.initialize();
+
+      if (available) {
+        setState(() {
+          _isRecording = true;
+        });
+
+        _speech.listen(
+          localeId: "en_US",
+          onResult: (result) {
+            setState(() {
+              spokenText = result.recognizedWords;
+            });
+          },
+        );
+      }
     } else {
-      print("Stopped recording...");
-      // Stop recording and process
+      setState(() {
+        _isRecording = false;
+      });
 
-      Future.delayed(Duration(milliseconds: 500), () {
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (context) => HasilTestPage(
-        //       correctAnswers: 10,
-        //       wrongAnswers: 3,
-        //       totalPoints: 10,
-        //     ),
-        //   ),
-        // );
+      _speech.stop();
+
+      print("HASIL SUARA: $spokenText");
+
+      Future.delayed(Duration(milliseconds: 400), () {
         _showResultPopup(context);
       });
     }
@@ -219,11 +235,10 @@ class _LearningSpeakingStart extends State<LearningSpeakingStart> {
 
   List<Question> get currentLevelQuestions => questionsData[widget.level] ?? [];
   Question get currentQuestion => currentLevelQuestions[currentQuestionIndex];
-
   bool get isLastQuestion =>
       currentQuestionIndex >= currentLevelQuestions.length - 1;
 
-  // Fungsi untuk menampilkan popup (bottom sheet)
+  // BOTTOM SHEET RESULT
   void _showResultPopup(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -245,7 +260,6 @@ class _LearningSpeakingStart extends State<LearningSpeakingStart> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Bagian atas (garis + teks)
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -272,9 +286,7 @@ class _LearningSpeakingStart extends State<LearningSpeakingStart> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          currentQuestion.isCorrect
-                              ? 'Benar! 🎉'
-                              : 'Kurang Tepat 🥺',
+                          currentQuestion.isCorrect ? 'Benar! 🎉' : 'Kurang Tepat 🥺',
                           style: const TextStyle(
                             color: AppColors.primary,
                             fontWeight: FontWeight.bold,
@@ -295,7 +307,7 @@ class _LearningSpeakingStart extends State<LearningSpeakingStart> {
                   ],
                 ),
 
-                // Bagian bawah (tombol)
+                // NEXT or FINISH
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: SizedBox(
@@ -305,7 +317,6 @@ class _LearningSpeakingStart extends State<LearningSpeakingStart> {
                       onPressed: () {
                         Navigator.pop(context);
                         if (isLastQuestion) {
-                          // Navigate to completion page when level is finished
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
@@ -315,9 +326,9 @@ class _LearningSpeakingStart extends State<LearningSpeakingStart> {
                             ),
                           );
                         } else {
-                          // Lanjut ke soal berikutnya
                           setState(() {
                             currentQuestionIndex++;
+                            spokenText = "";
                           });
                         }
                       },
@@ -355,9 +366,7 @@ class _LearningSpeakingStart extends State<LearningSpeakingStart> {
         elevation: 0,
         leading: IconButton(
           icon: const FaIcon(FontAwesomeIcons.arrowLeft, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: Padding(
@@ -382,6 +391,7 @@ class _LearningSpeakingStart extends State<LearningSpeakingStart> {
               ),
             ),
             const SizedBox(height: 32),
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -400,20 +410,38 @@ class _LearningSpeakingStart extends State<LearningSpeakingStart> {
               ],
             ),
             const SizedBox(height: 16),
-            // Progress bar
+
             LinearProgressIndicator(
               value: (currentQuestionIndex + 1) / 10,
               backgroundColor: Colors.grey[300],
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                AppColors.primary,
-              ),
+              valueColor:
+                  const AlwaysStoppedAnimation<Color>(AppColors.primary),
             ),
+
             const SizedBox(height: 24),
+
             Text(
               currentQuestion.text,
               style: const TextStyle(fontSize: 15, color: Colors.black87),
             ),
+
             const Spacer(),
+
+            // TAMPILKAN HASIL SUARA USER
+            if (spokenText.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Center(
+                  child: Text(
+                    "You said: $spokenText",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.grey.shade700,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
 
             Center(
               child: Column(
@@ -436,10 +464,15 @@ class _LearningSpeakingStart extends State<LearningSpeakingStart> {
                               ]
                             : [],
                       ),
-                      child: Icon(Icons.mic, color: Colors.white, size: 50),
+                      child: Icon(
+                        Icons.mic,
+                        color: Colors.white,
+                        size: 50,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
+
                   Text(
                     _isRecording ? "Recording..." : "Tap to Speak",
                     style: TextStyle(

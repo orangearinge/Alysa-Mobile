@@ -8,6 +8,7 @@ class Question {
   final String feedback;
   final bool isCorrect;
 
+  // model data
   Question({
     required this.text,
     required this.feedback,
@@ -24,6 +25,7 @@ class LearningWritingStart extends StatefulWidget {
   State<LearningWritingStart> createState() => _LearningWritingStartState();
 }
 
+// untuk melacak pertanyaan yang sedang aktif
 class _LearningWritingStartState extends State<LearningWritingStart> {
   int currentQuestionIndex = 0;
 
@@ -187,7 +189,8 @@ class _LearningWritingStartState extends State<LearningWritingStart> {
     ],
   };
 
-  List<Question> get currentLevelQuestions => questionsData[widget.level] ?? [];
+  // getter
+  List<Question> get currentLevelQuestions => questionsData[widget.level] ?? []; 
   Question get currentQuestion => currentLevelQuestions[currentQuestionIndex];
 
   bool get isLastQuestion =>
