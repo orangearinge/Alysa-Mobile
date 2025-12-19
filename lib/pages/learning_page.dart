@@ -1,117 +1,105 @@
-import 'package:alysa_speak/theme/app_color.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:alysa_speak/theme/app_color.dart';
+import 'package:alysa_speak/data/mock_data.dart';
+import 'package:alysa_speak/pages/quiz_page.dart';
+import 'package:alysa_speak/pages/lesson_detail_page.dart';
 
 class LearningPage extends StatelessWidget {
   const LearningPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final lessons = MockData().lessons;
+
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
+        title: Text("Learning Materials", style: GoogleFonts.poppins(color: Colors.black, fontWeight: FontWeight.w600)),
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const FaIcon(FontAwesomeIcons.arrowLeft, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+        iconTheme: const IconThemeData(color: Colors.black),
       ),
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Judul
-                Text(
-                  'LEARNING',
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 30),
-
-                // Gambar
-                Image.asset(
-                  'assets/images/learning_page.png',
-                  width: 180,
-                  height: 180,
-                ),
-                const SizedBox(height: 30),
-
-                // Deskripsi
-                const Text(
-                  'Explore all the existing job roles based on your\ninterest and study major',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.black54,
-                    fontSize: 14,
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 40),
-
-                // Tombol Speaking
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/speaking');
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.secondary,
-                      foregroundColor: AppColors.primary,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+      backgroundColor: Colors.grey[50],
+      body: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: lessons.length,
+        itemBuilder: (context, index) {
+          final lesson = lessons[index];
+          return Card(
+            margin: const EdgeInsets.only(bottom: 16),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            elevation: 2,
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context, 
+                  MaterialPageRoute(builder: (_) => LessonDetailPage(lesson: lesson))
+                );
+              },
+              borderRadius: BorderRadius.circular(16),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Center(
+                        child: Text(
+                          lesson.category[0],
+                          style: GoogleFonts.poppins(
+                            fontSize: 24, 
+                            fontWeight: FontWeight.bold, 
+                            color: AppColors.primary
+                          ),
+                        ),
                       ),
                     ),
-                    child: const Text(
-                      'SPEAKING',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            lesson.category.toUpperCase(),
+                            style: GoogleFonts.poppins(
+                              fontSize: 12, 
+                              color: AppColors.primary, 
+                              fontWeight: FontWeight.bold
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            lesson.title,
+                            style: GoogleFonts.poppins(
+                              fontSize: 16, 
+                              fontWeight: FontWeight.w600
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            "${lesson.durationMinutes} mins • ${lesson.description}",
+                            style: GoogleFonts.poppins(
+                              fontSize: 12, 
+                              color: Colors.grey[600]
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
                     ),
-                  ),
+                    const Icon(Icons.arrow_forward_ios, color: AppColors.primary, size: 20),
+                  ],
                 ),
-                const SizedBox(height: 15),
-
-                // Tombol Writing
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/writing');
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.secondary,
-                      foregroundColor: AppColors.primary,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text(
-                      'WRITING',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

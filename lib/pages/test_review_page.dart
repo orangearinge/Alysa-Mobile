@@ -129,7 +129,7 @@ class _TestReviewPageState extends State<TestReviewPage> {
                           });
                           // Tampilkan popup untuk soal berikutnya
                           Future.delayed(Duration(milliseconds: 300), () {
-                            _showResultPopup(context);
+                            if (mounted) _showResultPopup(context);
                           });
                         }
                       },

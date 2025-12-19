@@ -2,6 +2,8 @@ import 'package:alysa_speak/theme/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:alysa_speak/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:alysa_speak/data/mock_data.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -10,145 +12,378 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final AuthService authService = AuthService();
     final User? user = authService.currentUser;
+    final userProfile = MockData().currentUser;
 
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-        child: Column(
-          children: [
-            const SizedBox(height: 40),
-            // Avatar
-            CircleAvatar(
-              radius: 50,
-              backgroundColor: AppColors.primary,
-              backgroundImage: user?.photoURL != null
-                  ? NetworkImage(user!.photoURL!)
-                  : null,
-              child: user?.photoURL == null
-                  ? const Icon(Icons.person, color: Colors.white, size: 60)
-                  : null,
-            ),
-            const SizedBox(height: 16),
-            // Name
-            Text(
-              user?.displayName ?? "User",
-              style: TextStyle(
-                color: AppColors.primary,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-            ),
-            const SizedBox(height: 4),
-            // Email
-            Text(
-              user?.email ?? "No Email",
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-            ),
-            const SizedBox(height: 16),
-            // Logout Button
-            TextButton.icon(
-              onPressed: () {
-                // Logout action
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: Text("Logout"),
-                    content: Text("Are you sure you want to logout?"),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: Text("Cancel"),
-                      ),
-                      TextButton(
-                        onPressed: () async {
-                          // Perform logout
-                          Navigator.pop(context);
-                          await authService.signOut();
-                        },
-                        child: Text(
-                          "Logout",
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      ),
-                    ],
+    return Scaffold(
+      backgroundColor: Colors.grey[50],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              // Header with gradient background
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppColors.primary, AppColors.primary.withOpacity(0.8)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                );
-              },
-              icon: Icon(Icons.logout, color: Colors.red, size: 18),
-              label: Text(
-                "Logout",
-                style: TextStyle(
-                  color: Colors.red,
-                  fontWeight: FontWeight.w600,
+                ),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 40),
+                    // Avatar
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 3),
+                      ),
+                      child: CircleAvatar(
+                        radius: 50,
+                        backgroundColor: Colors.white,
+                        backgroundImage: user?.photoURL != null
+                            ? NetworkImage(user!.photoURL!)
+                            : null,
+                        child: user?.photoURL == null
+                            ? Icon(Icons.person, color: AppColors.primary, size: 60)
+                            : null,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Name
+                    Text(
+                      user?.displayName ?? "User",
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    // Email
+                    Text(
+                      user?.email ?? "No Email",
+                      style: GoogleFonts.poppins(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                  ],
                 ),
               ),
-            ),
-            const SizedBox(height: 40),
-            // Menu Items
-            // _buildMenuItem(
-            //   context: context,
-            //   icon: Icons.person_outline,
-            //   title: "Edit profile",
-            //   onTap: () {
-            //     // Navigate to edit profile
-            //   },
-            // ),
-            // _buildMenuItem(
-            //   context: context,
-            //   icon: Icons.help_outline,
-            //   title: "Help & Support",
-            //   onTap: () {
-            //     // Navigate to help & support
-            //   },
-            // ),
-            // _buildMenuItem(
-            //   context: context,
-            //   icon: Icons.info_outline,
-            //   title: "Terms and Policies",
-            //   onTap: () {
-            //     // Navigate to terms and policies
-            //   },
-            // ),
-          ],
+
+              // Stats Cards
+              Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Stats Row
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildStatCard(
+                            icon: Icons.emoji_events,
+                            title: "Target Score",
+                            value: "${userProfile.targetScore ?? 6.5}",
+                            color: Colors.orange,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: _buildStatCard(
+                            icon: Icons.timer,
+                            title: "Daily Goal",
+                            value: "${userProfile.dailyStudyTimeMinutes ?? 30}m",
+                            color: Colors.blue,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Account Section
+                    Text(
+                      "Account",
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildMenuItem(
+                      context: context,
+                      icon: Icons.person_outline,
+                      title: "Edit Profile",
+                      subtitle: "Update your personal information",
+                      onTap: () {
+                        // Navigate to edit profile
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Edit Profile - Coming Soon")),
+                        );
+                      },
+                    ),
+                    _buildMenuItem(
+                      context: context,
+                      icon: Icons.notifications_outlined,
+                      title: "Notifications",
+                      subtitle: "Manage notification preferences",
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Notifications - Coming Soon")),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Support Section
+                    Text(
+                      "Support",
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildMenuItem(
+                      context: context,
+                      icon: Icons.help_outline,
+                      title: "Help & Support",
+                      subtitle: "Get help with the app",
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Help & Support - Coming Soon")),
+                        );
+                      },
+                    ),
+                    _buildMenuItem(
+                      context: context,
+                      icon: Icons.info_outline,
+                      title: "About",
+                      subtitle: "Learn more about Alysa",
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("About - Coming Soon")),
+                        );
+                      },
+                    ),
+                    _buildMenuItem(
+                      context: context,
+                      icon: Icons.privacy_tip_outlined,
+                      title: "Privacy Policy",
+                      subtitle: "Read our privacy policy",
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Privacy Policy - Coming Soon")),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Logout Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              title: Text(
+                                "Logout",
+                                style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+                              ),
+                              content: Text(
+                                "Are you sure you want to logout?",
+                                style: GoogleFonts.poppins(),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: Text(
+                                    "Cancel",
+                                    style: GoogleFonts.poppins(color: Colors.grey),
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () async {
+                                    Navigator.pop(context);
+                                    await authService.signOut();
+                                  },
+                                  child: Text(
+                                    "Logout",
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.logout, color: Colors.red),
+                        label: Text(
+                          "Logout",
+                          style: GoogleFonts.poppins(
+                            color: Colors.red,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Colors.red, width: 2),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // App Version
+                    Center(
+                      child: Text(
+                        "Version 1.0.0",
+                        style: GoogleFonts.poppins(
+                          color: Colors.grey,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // Widget _buildMenuItem({
-  //   required BuildContext context,
-  //   required IconData icon,
-  //   required String title,
-  //   required VoidCallback onTap,
-  // }) {
-  //   return InkWell(
-  //     onTap: onTap,
-  //     child: Container(
-  //       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-  //       margin: const EdgeInsets.only(bottom: 8),
-  //       decoration: BoxDecoration(
-  //         color: Colors.white,
-  //         borderRadius: BorderRadius.circular(12),
-  //         border: Border.all(color: Colors.grey.shade200),
-  //       ),
-  //       child: Row(
-  //         children: [
-  //           Icon(icon, color: Colors.grey.shade700, size: 24),
-  //           const SizedBox(width: 16),
-  //           Expanded(
-  //             child: Text(
-  //               title,
-  //               style: TextStyle(
-  //                 fontSize: 16,
-  //                 color: Colors.black87,
-  //                 fontWeight: FontWeight.w500,
-  //               ),
-  //             ),
-  //           ),
-  //           Icon(Icons.chevron_right, color: Colors.grey.shade400),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
+  Widget _buildStatCard({
+    required IconData icon,
+    required String title,
+    required String value,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: color, size: 28),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: GoogleFonts.poppins(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              color: Colors.grey[600],
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMenuItem({
+    required BuildContext context,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: AppColors.primary, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right, color: Colors.grey[400]),
+          ],
+        ),
+      ),
+    );
+  }
 }

@@ -4,8 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:alysa_speak/firebase_options.dart';
 import 'package:alysa_speak/pages/home_page.dart';
 import 'package:alysa_speak/pages/learning_page.dart';
-import 'package:alysa_speak/pages/learning_speaking_level_choise.dart';
-import 'package:alysa_speak/pages/learning_writing_level_choice.dart';
+import 'package:alysa_speak/pages/onboarding_page.dart';
+import 'package:alysa_speak/pages/planning_page.dart';
 import 'package:alysa_speak/pages/login_page.dart';
 import 'package:alysa_speak/pages/start_test.dart';
 import 'package:alysa_speak/pages/welcome_screen.dart';
@@ -39,15 +39,13 @@ class MyApp extends StatelessWidget {
       // Remove initialRoute and use home for AuthGate
       home: const AuthGate(),
       routes: {
-        // '/': (context) => const WelcomePage(), // Managed by AuthGate
         '/welcome': (context) => const WelcomePage(),
         '/login': (context) => const LoginPage(),
         '/create': (context) => const CreateAccountPage(),
+        '/onboarding': (context) => const OnboardingPage(),
         '/home': (context) => const HomePage(),
+        '/planning': (context) => const PlanningPage(),
         '/learning': (context) => const LearningPage(),
-        '/learning-end': (context) => const HasilTestPage(),
-        '/writing': (context) => const LearningWriting(),
-        '/speaking': (context) => const LearningSpeaking(),
         '/start_test': (context) => const StartTest(),
         '/soal_test': (context) => const TestMixedPage(),
         '/hasil_test': (context) => HasilTestPage(correctAnswers: 0),
