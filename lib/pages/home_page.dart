@@ -1,11 +1,12 @@
+import 'package:alysa_speak/pages/learning_page.dart';
 import 'package:alysa_speak/theme/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:alysa_speak/pages/profile_page.dart';
 import 'package:alysa_speak/pages/scan_page.dart';
+import 'package:alysa_speak/pages/start_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:alysa_speak/pages/quiz_page.dart';
-
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -166,11 +167,6 @@ class _HomeContent extends StatelessWidget {
                       ),
                     ],
                   ),
-                   CircleAvatar(
-                    radius: 24,
-                    backgroundColor: AppColors.primary,
-                    child: const Icon(Icons.person, color: Colors.white),
-                  ),
                 ],
               ),
               const SizedBox(height: 32),
@@ -179,11 +175,20 @@ class _HomeContent extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("Today's Plan", style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(
+                    "Today's Plan",
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   TextButton(
                     onPressed: () => Navigator.pushNamed(context, '/planning'),
-                    child: Text("View All", style: GoogleFonts.poppins(color: AppColors.primary)),
-                  )
+                    child: Text(
+                      "View All",
+                      style: GoogleFonts.poppins(color: AppColors.primary),
+                    ),
+                  ),
                 ],
               ),
               InkWell(
@@ -193,7 +198,9 @@ class _HomeContent extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: AppColors.secondary.withOpacity(0.3),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+                    border: Border.all(
+                      color: AppColors.primary.withOpacity(0.2),
+                    ),
                   ),
                   child: Row(
                     children: [
@@ -209,16 +216,26 @@ class _HomeContent extends StatelessWidget {
                           children: [
                             Text(
                               "Daily Goal: 30 mins",
-                              style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 16),
+                              style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                              ),
                             ),
                             Text(
                               "12 mins completed",
-                              style: GoogleFonts.poppins(color: Colors.grey[700], fontSize: 13),
+                              style: GoogleFonts.poppins(
+                                color: Colors.grey[700],
+                                fontSize: 13,
+                              ),
                             ),
                           ],
                         ),
                       ),
-                      const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                      const Icon(
+                        Icons.arrow_forward_ios,
+                        size: 16,
+                        color: Colors.grey,
+                      ),
                     ],
                   ),
                 ),
@@ -229,11 +246,20 @@ class _HomeContent extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("Lessons", style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(
+                    "Lessons",
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   TextButton(
                     onPressed: () => Navigator.pushNamed(context, '/learning'),
-                    child: Text("See All", style: GoogleFonts.poppins(color: AppColors.primary)),
-                  )
+                    child: Text(
+                      "See All",
+                      style: GoogleFonts.poppins(color: AppColors.primary),
+                    ),
+                  ),
                 ],
               ),
               SizedBox(
@@ -241,17 +267,132 @@ class _HomeContent extends StatelessWidget {
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   children: [
-                    _buildLessonCard(context, "Speaking", Icons.mic, Colors.orange),
-                    _buildLessonCard(context, "Writing", Icons.edit, Colors.blue),
-                    _buildLessonCard(context, "Reading", Icons.book, Colors.green),
-                    _buildLessonCard(context, "Listening", Icons.headphones, Colors.purple),
+                    _buildLessonCard(
+                      context,
+                      "Speaking",
+                      Icons.mic,
+                      Colors.orange,
+                    ),
+                    _buildLessonCard(
+                      context,
+                      "Writing",
+                      Icons.edit,
+                      Colors.blue,
+                    ),
+                    _buildLessonCard(
+                      context,
+                      "Reading",
+                      Icons.book,
+                      Colors.green,
+                    ),
+                    _buildLessonCard(
+                      context,
+                      "Listening",
+                      Icons.headphones,
+                      Colors.purple,
+                    ),
                   ],
                 ),
               ),
               const SizedBox(height: 32),
 
-
-             
+              // Start Test Section
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.primary,
+                      AppColors.primary.withOpacity(0.8),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.3),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.psychology,
+                            color: Colors.white,
+                            size: 32,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Ready to Test?",
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                "Challenge yourself now!",
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white.withOpacity(0.9),
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const StartTest(),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: AppColors.primary,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          "Start Test",
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
             ],
           ),
         ),
@@ -259,9 +400,19 @@ class _HomeContent extends StatelessWidget {
     );
   }
 
-  Widget _buildLessonCard(BuildContext context, String title, IconData icon, Color color) {
+  Widget _buildLessonCard(
+    BuildContext context,
+    String title,
+    IconData icon,
+    Color color,
+  ) {
     return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, '/learning'),
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => LearningPage(selectedCategory: title),
+        ),
+      ),
       child: Container(
         width: 100,
         margin: const EdgeInsets.only(right: 16),
@@ -278,16 +429,19 @@ class _HomeContent extends StatelessWidget {
                 color: Colors.white,
                 shape: BoxShape.circle,
                 boxShadow: [
-                  BoxShadow(
-                    color: color.withOpacity(0.2),
-                    blurRadius: 8,
-                  )
-                ]
+                  BoxShadow(color: color.withOpacity(0.2), blurRadius: 8),
+                ],
               ),
               child: Icon(icon, color: color),
             ),
             const SizedBox(height: 12),
-            Text(title, style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 13)),
+            Text(
+              title,
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
           ],
         ),
       ),

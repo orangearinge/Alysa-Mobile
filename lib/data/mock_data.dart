@@ -19,11 +19,7 @@ class LessonSection {
   final String content;
   final String? quizId; // If not null, this section is a quiz entry
 
-  LessonSection({
-    required this.title,
-    this.content = '',
-    this.quizId,
-  });
+  LessonSection({required this.title, this.content = '', this.quizId});
 }
 
 class LessonMock {
@@ -63,11 +59,7 @@ class QuizMock {
   final String title;
   final List<QuizQuestionMock> questions;
 
-  QuizMock({
-    required this.id,
-    required this.title,
-    required this.questions,
-  });
+  QuizMock({required this.id, required this.title, required this.questions});
 }
 
 class MockData {
@@ -76,10 +68,10 @@ class MockData {
   MockData._internal();
 
   UserProfileMock currentUser = UserProfileMock(
-      uid: 'dummy_uid',
-      targetScore: 6.5,
-      dailyStudyTimeMinutes: 30,
-      testDate: DateTime.now().add(const Duration(days: 30))
+    uid: 'dummy_uid',
+    targetScore: 6.5,
+    dailyStudyTimeMinutes: 30,
+    testDate: DateTime.now().add(const Duration(days: 30)),
   );
 
   void setUserProfile({
@@ -88,11 +80,13 @@ class MockData {
     DateTime? testDate,
   }) {
     currentUser.targetScore = targetScore ?? currentUser.targetScore;
-    currentUser.dailyStudyTimeMinutes = dailyStudyTimeMinutes ?? currentUser.dailyStudyTimeMinutes;
+    currentUser.dailyStudyTimeMinutes =
+        dailyStudyTimeMinutes ?? currentUser.dailyStudyTimeMinutes;
     currentUser.testDate = testDate ?? currentUser.testDate;
   }
 
   final List<LessonMock> lessons = [
+    // SPEAKING
     LessonMock(
       id: '1',
       title: 'Introduction to IELTS Speaking',
@@ -103,22 +97,74 @@ class MockData {
       sections: [
         LessonSection(
           title: 'Overview',
-          content: 'The IELTS Speaking test consists of 3 parts and lasts 11-14 minutes. It is a face-to-face interview with an examiner.',
+          content:
+              'The IELTS Speaking test consists of 3 parts and lasts 11-14 minutes. It is a face-to-face interview with an examiner.',
         ),
         LessonSection(
           title: 'Part 1: Introduction and Interview',
-          content: 'In this part, the examiner asks you general questions about yourself and a range of familiar topics, such as home, family, work, studies and interests. This part lasts between 4 and 5 minutes.',
+          content:
+              'In this part, the examiner asks you general questions about yourself and a range of familiar topics, such as home, family, work, studies and interests. This part lasts between 4 and 5 minutes.',
         ),
         LessonSection(
           title: 'Part 2: Long Turn',
-          content: 'You will be given a card which asks you to talk about a particular topic. You will have 1 minute to prepare before speaking for up to 2 minutes. The examiner will then ask one or two questions on the same topic.',
+          content:
+              'You will be given a card which asks you to talk about a particular topic. You will have 1 minute to prepare before speaking for up to 2 minutes. The examiner will then ask one or two questions on the same topic.',
+        ),
+        LessonSection(title: 'Quiz: Speaking Basics', quizId: 'q1'),
+      ],
+    ),
+    LessonMock(
+      id: 's2',
+      title: 'Speaking Part 2 Strategies',
+      description: 'Master the "Long Turn" with effective note-taking.',
+      category: 'Speaking',
+      durationMinutes: 15,
+      sections: [
+        LessonSection(
+          title: 'Using the 1 Minute Preparation',
+          content:
+              'Don\'t write full sentences. Write keywords and structure your talk.',
         ),
         LessonSection(
-          title: 'Quiz: Speaking Basics',
-          quizId: 'q1',
+          title: 'Structure Your Talk',
+          content:
+              'Introduction -> Past -> Present -> Future -> Conclusion/Opinion.',
         ),
       ],
     ),
+    LessonMock(
+      id: 's3',
+      title: 'Common Topics in Speaking Part 1',
+      description: 'Prepare for questions about home, work, and hobbies.',
+      category: 'Speaking',
+      durationMinutes: 10,
+      sections: [
+        LessonSection(
+          title: 'Home & Hometown',
+          content: 'Be ready to describe your room, house, or neighborhood.',
+        ),
+        LessonSection(
+          title: 'Work & Studies',
+          content: 'Know the vocabulary for your major or job role.',
+        ),
+      ],
+    ),
+    LessonMock(
+      id: 's4',
+      title: 'Improving Fluency & Coherence',
+      description: 'Speak naturally without too many pauses.',
+      category: 'Speaking',
+      durationMinutes: 20,
+      sections: [
+        LessonSection(
+          title: 'Fillers',
+          content:
+              'Use natural fillers like "Well...", "Actually...", "To be honest..." instead of "Umm".',
+        ),
+      ],
+    ),
+
+    // WRITING
     LessonMock(
       id: '2',
       title: 'Writing Task 1: Charts',
@@ -126,33 +172,183 @@ class MockData {
       category: 'Writing',
       durationMinutes: 25,
       sections: [
-         LessonSection(
+        LessonSection(
           title: 'Understanding Bar Charts',
-          content: 'Bar charts show comparison between categories. Look for the highest and lowest values first.',
+          content:
+              'Bar charts show comparison between categories. Look for the highest and lowest values first.',
         ),
         LessonSection(
           title: 'Key Vocabulary',
-          content: 'Use words like "increase", "decrease", "fluctuate", "remain steady".',
+          content:
+              'Use words like "increase", "decrease", "fluctuate", "remain steady".',
         ),
-         LessonSection(
-          title: 'Quiz: Bar Charts',
-          quizId: 'q1', // Reusing q1 for demo
-        ),
-      ]
+        LessonSection(title: 'Quiz: Bar Charts', quizId: 'q1'),
+      ],
     ),
+    LessonMock(
+      id: 'w2',
+      title: 'Writing Task 2: Essay Structures',
+      description: 'Organize your opinion or argument essays clearly.',
+      category: 'Writing',
+      durationMinutes: 30,
+      sections: [
+        LessonSection(
+          title: '4-Paragraph Structure',
+          content:
+              'Introduction, Body Paragraph 1, Body Paragraph 2, Conclusion.',
+        ),
+        LessonSection(
+          title: 'Thesis Statement',
+          content: 'Clearly state your position in the introduction.',
+        ),
+      ],
+    ),
+    LessonMock(
+      id: 'w3',
+      title: 'Letter Writing (General Training)',
+      description: 'Formal vs Informal letters.',
+      category: 'Writing',
+      durationMinutes: 20,
+      sections: [
+        LessonSection(
+          title: 'Formal Openings',
+          content: '"Dear Sir/Madam," or "Dear Mr. Smith,"',
+        ),
+        LessonSection(
+          title: 'Informal Openings',
+          content: '"Hi John," or "Dearest Alice,"',
+        ),
+      ],
+    ),
+    LessonMock(
+      id: 'w4',
+      title: 'Vocabulary for Writing',
+      description: 'Academic words to boost your score.',
+      category: 'Writing',
+      durationMinutes: 15,
+      sections: [
+        LessonSection(
+          title: 'Linking Words',
+          content: 'Furthermore, However, Consequently, In contrast.',
+        ),
+      ],
+    ),
+
+    // LISTENING
     LessonMock(
       id: '3',
       title: 'Listening for Details',
       description: 'Techniques to catch specific information.',
       category: 'Listening',
       durationMinutes: 20,
+      sections: [
+        LessonSection(
+          title: 'Names and Numbers',
+          content:
+              'Practice listening for spelling of names and long numbers (phone numbers, dates).',
+        ),
+      ],
     ),
-     LessonMock(
+    LessonMock(
+      id: 'l2',
+      title: 'Predicting Answers',
+      description: 'Use context to guess the type of word needed.',
+      category: 'Listening',
+      durationMinutes: 20,
+      sections: [
+        LessonSection(
+          title: 'Grammar Clues',
+          content:
+              'If there is "a" or "an" before the blank, you know it is a singular noun.',
+        ),
+      ],
+    ),
+    LessonMock(
+      id: 'l3',
+      title: 'Listening to Accents',
+      description:
+          'Familiarize yourself with British, Australian, and American accents.',
+      category: 'Listening',
+      durationMinutes: 15,
+      sections: [
+        LessonSection(
+          title: 'The "R" Sound',
+          content:
+              'American English emphasizes the "r", while British English often drops it at the end of words.',
+        ),
+      ],
+    ),
+    LessonMock(
+      id: 'l4',
+      title: 'Map Labeling',
+      description: 'Navigating directions in Listening Section 2.',
+      category: 'Listening',
+      durationMinutes: 25,
+      sections: [
+        LessonSection(
+          title: 'Directional Language',
+          content:
+              'North, South, East, West, across from, next to, past the bridge.',
+        ),
+      ],
+    ),
+
+    // READING
+    LessonMock(
       id: '4',
       title: 'Reading Skimming Techniques',
       description: 'Read faster and find answers quicker.',
       category: 'Reading',
       durationMinutes: 30,
+      sections: [
+        LessonSection(
+          title: 'Read First and Last Sentences',
+          content:
+              'Topic sentences often contain the main idea of the paragraph.',
+        ),
+      ],
+    ),
+    LessonMock(
+      id: 'r2',
+      title: 'Scanning for Keywords',
+      description: 'Locate information without reading every word.',
+      category: 'Reading',
+      durationMinutes: 15,
+      sections: [
+        LessonSection(
+          title: 'Proper Nouns and Dates',
+          content:
+              'Scan for capital letters and numbers as they are easy to spot.',
+        ),
+      ],
+    ),
+    LessonMock(
+      id: 'r3',
+      title: 'True, False, Not Given',
+      description: 'Strategies to handle this tricky question type.',
+      category: 'Reading',
+      durationMinutes: 25,
+      sections: [
+        LessonSection(
+          title: 'Not Given vs False',
+          content:
+              'False means the text says the opposite. Not Given means the information is missing.',
+        ),
+      ],
+    ),
+    LessonMock(
+      id: 'r4',
+      title: 'Matching Headings',
+      description: 'Match the correct heading to paragraphs.',
+      category: 'Reading',
+      durationMinutes: 20,
+      sections: [
+        LessonSection(
+          title: 'Don\'t rely on flexible keywords',
+          content:
+              'Focus on the main idea rather than just matching single words.',
+        ),
+      ],
     ),
   ];
 
