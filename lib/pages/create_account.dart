@@ -43,7 +43,11 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     try {
       await _authService.signUpWithEmailAndPassword(email, pass);
       if (mounted) {
-        Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/onboarding',
+          (route) => false,
+        );
       }
     } catch (e) {
       setState(() => errorMessage = e.toString());
@@ -198,17 +202,20 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     ),
                     child: _isLoading
                         ? const Center(
-                            child: CircularProgressIndicator(color: Colors.white))
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
+                          )
                         : Text(
                             "Sign Up",
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
                   ),
-                ),  
+                ),
 
                 const SizedBox(height: 20),
 

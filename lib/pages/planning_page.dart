@@ -2,36 +2,70 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:alysa_speak/theme/app_color.dart';
-import 'package:alysa_speak/data/mock_data.dart';
+import 'package:alysa_speak/services/learning_service.dart';
+import 'package:alysa_speak/services/user_service.dart';
+import 'package:alysa_speak/models/learning_model.dart';
+import 'package:alysa_speak/models/user_model.dart';
 import 'package:alysa_speak/pages/lesson_detail_page.dart';
 
-class PlanningPage extends StatelessWidget {
+class PlanningPage extends StatefulWidget {
   const PlanningPage({super.key});
 
-  List<Map<String, dynamic>> _generateRoadmap() {
-    final user = MockData().currentUser;
-    final lessons = MockData().lessons;
-    final testDate = user.testDate ?? DateTime.now().add(const Duration(days: 30));
-    final daysLeft = testDate.difference(DateTime.now()).inDays;
-    
+  @override
+  State<PlanningPage> createState() => _PlanningPageState();
+}
+
+class _PlanningPageState extends State<PlanningPage> {
+  final UserService _userService = UserService();
+  final LearningService _learningService = LearningService();
+
+  late Future<UserProfile?> _userProfileFuture;
+  late Future<List<Lesson>> _lessonsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _userProfileFuture = _userService.getUserProfile();
+    _lessonsFuture = _learningService.getLessons();
+  }
+
+  List<Map<String, dynamic>> _generateRoadmap(
+    UserProfile user,
+    List<Lesson> lessons,
+  ) {
+    // If no testDate is returned from backend, default to 30 days from now
+    // But ideally backend checks if null.
+    final testDate =
+        user.testDate ?? DateTime.now().add(const Duration(days: 30));
+    final now = DateTime.now();
+
+    // If testDate is in the past, handle gracefully
+    int daysLeft = testDate.difference(now).inDays;
+    if (daysLeft < 0) daysLeft = 0;
+
     // Calculate lessons per week
-    final weeksLeft = (daysLeft / 7).ceil();
-    final lessonsPerWeek = (lessons.length / weeksLeft).ceil();
-    
+    // Minimum 1 week if daysLeft is small
+    final weeksLeft = (daysLeft / 7).ceil() > 0 ? (daysLeft / 7).ceil() : 1;
+
+    // Avoid division by zero if weeksLeft is 0 (handled above), or no lessons
+    final lessonsPerWeek = weeksLeft > 0
+        ? (lessons.length / weeksLeft).ceil()
+        : lessons.length;
+
     List<Map<String, dynamic>> roadmap = [];
-    DateTime currentDate = DateTime.now();
-    
+    DateTime currentDate = now;
+
     for (int week = 0; week < weeksLeft; week++) {
       final weekStart = currentDate.add(Duration(days: week * 7));
       final weekEnd = weekStart.add(const Duration(days: 6));
-      
+
       // Get lessons for this week
       final startIndex = week * lessonsPerWeek;
       final endIndex = (startIndex + lessonsPerWeek).clamp(0, lessons.length);
-      
+
       if (startIndex < lessons.length) {
         final weekLessons = lessons.sublist(startIndex, endIndex);
-        
+
         roadmap.add({
           'week': week + 1,
           'startDate': weekStart,
@@ -41,119 +75,182 @@ class PlanningPage extends StatelessWidget {
         });
       }
     }
-    
+
     return roadmap;
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = MockData().currentUser;
-    final testDate = user.testDate ?? DateTime.now().add(const Duration(days: 30));
-    final daysLeft = testDate.difference(DateTime.now()).inDays;
-    final roadmap = _generateRoadmap();
-
     return Scaffold(
       appBar: AppBar(
-        title: Text("Your Study Plan", style: GoogleFonts.poppins(color: Colors.black, fontWeight: FontWeight.w600)),
+        title: Text(
+          "Your Study Plan",
+          style: GoogleFonts.poppins(
+            color: Colors.black,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
       ),
       backgroundColor: Colors.grey[50],
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Target Card
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [AppColors.primary, AppColors.primary.withOpacity(0.8)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+      body: FutureBuilder(
+        future: Future.wait([_userProfileFuture, _lessonsFuture]),
+        builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text('Error loading plan: ${snapshot.error}'));
+          }
+
+          final UserProfile? user = snapshot.data?[0] as UserProfile?;
+          final List<Lesson> lessons = snapshot.data?[1] as List<Lesson>;
+
+          if (user == null) {
+            return const Center(
+              child: Text(
+                "User profile not found. Please setup your profile properly.",
+              ),
+            );
+          }
+
+          final testDate =
+              user.testDate ?? DateTime.now().add(const Duration(days: 30));
+          final daysLeft = testDate.difference(DateTime.now()).inDays;
+          final roadmap = _generateRoadmap(user, lessons);
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Target Card
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.primary,
+                        AppColors.primary.withOpacity(0.8),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.3),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Target Score",
+                            style: GoogleFonts.poppins(
+                              color: Colors.white70,
+                              fontSize: 14,
+                            ),
+                          ),
+                          Text(
+                            "${user.targetScore}",
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white24,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              "$daysLeft Days left",
+                              style: GoogleFonts.poppins(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            "Exam Date",
+                            style: GoogleFonts.poppins(
+                              color: Colors.white70,
+                              fontSize: 12,
+                            ),
+                          ),
+                          Text(
+                            DateFormat('MMM dd').format(testDate),
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Text(
+                            DateFormat('yyyy').format(testDate),
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                   BoxShadow(
-                      color: AppColors.primary.withOpacity(0.3),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                   )
-                ]
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Target Score",
-                        style: GoogleFonts.poppins(color: Colors.white70, fontSize: 14),
-                      ),
-                      Text(
-                        "${user.targetScore}",
-                        style: GoogleFonts.poppins(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.white24,
-                          borderRadius: BorderRadius.circular(8)
-                        ),
-                        child: Text(
-                          "$daysLeft Days left",
-                          style: GoogleFonts.poppins(color: Colors.white, fontSize: 12),
-                        ),
-                      )
-                    ],
+                const SizedBox(height: 32),
+
+                // Learning Roadmap Section
+                Text(
+                  "Learning Roadmap",
+                  style: GoogleFonts.poppins(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        "Exam Date",
-                        style: GoogleFonts.poppins(color: Colors.white70, fontSize: 12),
-                      ),
-                      Text(
-                         DateFormat('MMM dd').format(testDate),
-                        style: GoogleFonts.poppins(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
-                      ),
-                       Text(
-                         DateFormat('yyyy').format(testDate),
-                        style: GoogleFonts.poppins(color: Colors.white, fontSize: 14),
-                      ),
-                    ],
+                ),
+                const SizedBox(height: 16),
+
+                // Roadmap Timeline
+                if (roadmap.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      "No upcoming lessons found.",
+                      style: GoogleFonts.poppins(color: Colors.grey),
+                    ),
                   ),
-                ],
-              ),
+                ...roadmap.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final weekData = entry.value;
+                  final isLast = index == roadmap.length - 1;
+
+                  return _buildWeekCard(context, weekData, isLast);
+                }).toList(),
+              ],
             ),
-            const SizedBox(height: 32),
-
-            // Learning Roadmap Section
-            Text(
-              "Learning Roadmap",
-              style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-
-            // Roadmap Timeline
-            ...roadmap.asMap().entries.map((entry) {
-              final index = entry.key;
-              final weekData = entry.value;
-              final isLast = index == roadmap.length - 1;
-
-              return _buildWeekCard(
-                context,
-                weekData,
-                isLast,
-              );
-            }).toList(),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -166,7 +263,7 @@ class PlanningPage extends StatelessWidget {
     final week = weekData['week'] as int;
     final startDate = weekData['startDate'] as DateTime;
     final endDate = weekData['endDate'] as DateTime;
-    final lessons = weekData['lessons'] as List<LessonMock>;
+    final lessons = weekData['lessons'] as List<Lesson>;
     final isCurrentWeek = weekData['isCurrentWeek'] as bool;
 
     return Column(
@@ -196,11 +293,7 @@ class PlanningPage extends StatelessWidget {
                   ),
                 ),
                 if (!isLast)
-                  Container(
-                    width: 2,
-                    height: 60,
-                    color: Colors.grey[300],
-                  ),
+                  Container(width: 2, height: 60, color: Colors.grey[300]),
               ],
             ),
             const SizedBox(width: 16),
@@ -216,9 +309,9 @@ class PlanningPage extends StatelessWidget {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: isCurrentWeek 
-                          ? AppColors.primary 
-                          : Colors.grey.shade200,
+                        color: isCurrentWeek
+                            ? AppColors.primary
+                            : Colors.grey.shade200,
                         width: isCurrentWeek ? 2 : 1,
                       ),
                     ),
@@ -233,9 +326,9 @@ class PlanningPage extends StatelessWidget {
                                 style: GoogleFonts.poppins(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: isCurrentWeek 
-                                    ? AppColors.primary 
-                                    : Colors.black87,
+                                  color: isCurrentWeek
+                                      ? AppColors.primary
+                                      : Colors.black87,
                                 ),
                               ),
                             ),
@@ -271,71 +364,87 @@ class PlanningPage extends StatelessWidget {
                         const SizedBox(height: 16),
 
                         // Lessons for this week
-                        ...lessons.map((lesson) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => LessonDetailPage(lesson: lesson),
-                                ),
-                              );
-                            },
-                            borderRadius: BorderRadius.circular(8),
-                            child: Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[50],
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.grey.shade200),
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(8),
+                        ...lessons
+                            .map(
+                              (lesson) => Padding(
+                                padding: const EdgeInsets.only(bottom: 8),
+                                child: InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => LessonDetailPage(
+                                          lessonId: lesson.id,
+                                          title: lesson.title,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(12),
                                     decoration: BoxDecoration(
-                                      color: _getCategoryColor(lesson.category).withOpacity(0.1),
+                                      color: Colors.grey[50],
                                       borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: Colors.grey.shade200,
+                                      ),
                                     ),
-                                    child: Icon(
-                                      _getCategoryIcon(lesson.category),
-                                      color: _getCategoryColor(lesson.category),
-                                      size: 20,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                    child: Row(
                                       children: [
-                                        Text(
-                                          lesson.title,
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
+                                        Container(
+                                          padding: const EdgeInsets.all(8),
+                                          decoration: BoxDecoration(
+                                            color: _getCategoryColor(
+                                              lesson.category,
+                                            ).withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                          ),
+                                          child: Icon(
+                                            _getCategoryIcon(lesson.category),
+                                            color: _getCategoryColor(
+                                              lesson.category,
+                                            ),
+                                            size: 20,
                                           ),
                                         ),
-                                        Text(
-                                          "${lesson.durationMinutes} mins • ${lesson.category}",
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 11,
-                                            color: Colors.grey[600],
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                lesson.title,
+                                                style: GoogleFonts.poppins(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                              Text(
+                                                "${lesson.durationMinutes} mins • ${lesson.category}",
+                                                style: GoogleFonts.poppins(
+                                                  fontSize: 11,
+                                                  color: Colors.grey[600],
+                                                ),
+                                              ),
+                                            ],
                                           ),
+                                        ),
+                                        Icon(
+                                          Icons.arrow_forward_ios,
+                                          size: 16,
+                                          color: Colors.grey[400],
                                         ),
                                       ],
                                     ),
                                   ),
-                                  Icon(
-                                    Icons.arrow_forward_ios,
-                                    size: 16,
-                                    color: Colors.grey[400],
-                                  ),
-                                ],
+                                ),
                               ),
-                            ),
-                          ),
-                        )).toList(),
+                            )
+                            .toList(),
                       ],
                     ),
                   ),

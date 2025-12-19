@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:alysa_speak/theme/app_color.dart';
 import 'package:alysa_speak/services/auth_service.dart';
 
-
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -37,8 +36,7 @@ class _LoginPageState extends State<LoginPage> {
     try {
       await _authService.signInWithEmailAndPassword(email, pass);
       if (mounted) {
-        // Navigate to Onboarding instead of Home for this flow
-        Navigator.pushNamedAndRemoveUntil(context, '/onboarding', (route) => false);
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
       }
     } catch (e) {
       setState(() => errorMessage = e.toString());

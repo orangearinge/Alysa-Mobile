@@ -1,18 +1,43 @@
 import 'package:alysa_speak/theme/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:alysa_speak/services/auth_service.dart';
+import 'package:alysa_speak/services/user_service.dart';
+import 'package:alysa_speak/models/user_model.dart';
+import 'package:alysa_speak/pages/edit_profile_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:alysa_speak/data/mock_data.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  final UserService _userService = UserService();
+  Future<UserProfile?>? _userProfileFuture;
+  UserProfile? _currentUserProfile;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserProfile();
+  }
+
+  void _loadUserProfile() {
+    setState(() {
+      _userProfileFuture = _userService.getUserProfile().then((profile) {
+        _currentUserProfile = profile;
+        return profile;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final AuthService authService = AuthService();
     final User? user = authService.currentUser;
-    final userProfile = MockData().currentUser;
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -25,7 +50,10 @@ class ProfilePage extends StatelessWidget {
                 width: double.infinity,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [AppColors.primary, AppColors.primary.withOpacity(0.8)],
+                    colors: [
+                      AppColors.primary,
+                      AppColors.primary.withOpacity(0.8),
+                    ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -47,7 +75,11 @@ class ProfilePage extends StatelessWidget {
                             ? NetworkImage(user!.photoURL!)
                             : null,
                         child: user?.photoURL == null
-                            ? Icon(Icons.person, color: AppColors.primary, size: 60)
+                            ? Icon(
+                                Icons.person,
+                                color: AppColors.primary,
+                                size: 60,
+                              )
                             : null,
                       ),
                     ),
@@ -82,26 +114,44 @@ class ProfilePage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Stats Row
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildStatCard(
-                            icon: Icons.emoji_events,
-                            title: "Target Score",
-                            value: "${userProfile.targetScore ?? 6.5}",
-                            color: Colors.orange,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: _buildStatCard(
-                            icon: Icons.timer,
-                            title: "Daily Goal",
-                            value: "${userProfile.dailyStudyTimeMinutes ?? 30}m",
-                            color: Colors.blue,
-                          ),
-                        ),
-                      ],
+                    FutureBuilder<UserProfile?>(
+                      future: _userProfileFuture,
+                      builder: (context, snapshot) {
+                        final userProfile = snapshot.data;
+                        final targetScore =
+                            userProfile?.targetScore ?? 6.5; // Default if nil
+                        final dailyTime =
+                            userProfile?.dailyStudyTimeMinutes ?? 30; // Default
+
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+
+                        return Row(
+                          children: [
+                            Expanded(
+                              child: _buildStatCard(
+                                icon: Icons.emoji_events,
+                                title: "Target Score",
+                                value: "$targetScore",
+                                color: Colors.orange,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _buildStatCard(
+                                icon: Icons.timer,
+                                title: "Daily Goal",
+                                value: "${dailyTime}m",
+                                color: Colors.blue,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                     const SizedBox(height: 32),
 
@@ -118,67 +168,22 @@ class ProfilePage extends StatelessWidget {
                       context: context,
                       icon: Icons.person_outline,
                       title: "Edit Profile",
-                      subtitle: "Update your personal information",
-                      onTap: () {
+                      subtitle: "Update your target score and study plan",
+                      onTap: () async {
                         // Navigate to edit profile
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Edit Profile - Coming Soon")),
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EditProfilePage(
+                              userProfile: _currentUserProfile,
+                            ),
+                          ),
                         );
-                      },
-                    ),
-                    _buildMenuItem(
-                      context: context,
-                      icon: Icons.notifications_outlined,
-                      title: "Notifications",
-                      subtitle: "Manage notification preferences",
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Notifications - Coming Soon")),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 24),
 
-                    // Support Section
-                    Text(
-                      "Support",
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildMenuItem(
-                      context: context,
-                      icon: Icons.help_outline,
-                      title: "Help & Support",
-                      subtitle: "Get help with the app",
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Help & Support - Coming Soon")),
-                        );
-                      },
-                    ),
-                    _buildMenuItem(
-                      context: context,
-                      icon: Icons.info_outline,
-                      title: "About",
-                      subtitle: "Learn more about Alysa",
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("About - Coming Soon")),
-                        );
-                      },
-                    ),
-                    _buildMenuItem(
-                      context: context,
-                      icon: Icons.privacy_tip_outlined,
-                      title: "Privacy Policy",
-                      subtitle: "Read our privacy policy",
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Privacy Policy - Coming Soon")),
-                        );
+                        // If returned true, refresh data
+                        if (result == true) {
+                          _loadUserProfile();
+                        }
                       },
                     ),
                     const SizedBox(height: 24),
@@ -197,7 +202,9 @@ class ProfilePage extends StatelessWidget {
                               ),
                               title: Text(
                                 "Logout",
-                                style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               content: Text(
                                 "Are you sure you want to logout?",
@@ -208,13 +215,22 @@ class ProfilePage extends StatelessWidget {
                                   onPressed: () => Navigator.pop(context),
                                   child: Text(
                                     "Cancel",
-                                    style: GoogleFonts.poppins(color: Colors.grey),
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.grey,
+                                    ),
                                   ),
                                 ),
                                 TextButton(
                                   onPressed: () async {
                                     Navigator.pop(context);
                                     await authService.signOut();
+                                    if (context.mounted) {
+                                      Navigator.pushNamedAndRemoveUntil(
+                                        context,
+                                        '/',
+                                        (route) => false,
+                                      );
+                                    }
                                   },
                                   child: Text(
                                     "Logout",
@@ -310,10 +326,7 @@ class ProfilePage extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             title,
-            style: GoogleFonts.poppins(
-              fontSize: 12,
-              color: Colors.grey[600],
-            ),
+            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
             textAlign: TextAlign.center,
           ),
         ],

@@ -1,9 +1,10 @@
+import 'package:alysa_speak/config/api_constants.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'dart:io';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -13,9 +14,8 @@ class AuthService {
 
   User? get currentUser => _auth.currentUser;
 
-  // Backend URL (Use 10.0.2.2 for Android Emulator, localhost for iOS Simulator)
-  static const String _backendUrl = 'http://127.0.0.1:5000/api/auth/firebase-login';
-  
+  final _storage = const FlutterSecureStorage();
+
   String? _jwtToken;
   String? get jwtToken => _jwtToken;
 
@@ -26,13 +26,10 @@ class AuthService {
       if (idToken == null) throw "Failed to get ID Token";
 
       if (kDebugMode) {
-        print("FIREBASE ID TOKEN:\n$idToken\n"); // <--- Tambahan penting
+        print("FIREBASE ID TOKEN:\n$idToken\n");
       }
 
-      var url = _backendUrl;
-      if (!kIsWeb && Platform.isIOS) {
-        url = url.replaceAll('10.0.2.2', '127.0.0.1'); 
-      }
+      final url = ApiConstants.authUrl;
 
       final response = await http.post(
         Uri.parse(url),
@@ -45,9 +42,12 @@ class AuthService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         _jwtToken = data['access_token'];
+        if (_jwtToken != null) {
+          await _storage.write(key: 'jwt_token', value: _jwtToken);
+        }
 
         if (kDebugMode) {
-          print("BACKEND JWT TOKEN:\n$_jwtToken\n"); // <--- Tambahan penting
+          print("BACKEND JWT TOKEN:\n$_jwtToken\n");
         }
       } else {
         if (kDebugMode) {
@@ -61,9 +61,10 @@ class AuthService {
     }
   }
 
-
   Future<UserCredential?> signUpWithEmailAndPassword(
-      String email, String password) async {
+    String email,
+    String password,
+  ) async {
     try {
       final credential = await _auth.createUserWithEmailAndPassword(
         email: email,
@@ -80,7 +81,9 @@ class AuthService {
 
   // Sign In with Email and Password
   Future<UserCredential?> signInWithEmailAndPassword(
-      String email, String password) async {
+    String email,
+    String password,
+  ) async {
     try {
       final credential = await _auth.signInWithEmailAndPassword(
         email: email,
@@ -138,5 +141,6 @@ class AuthService {
     }
     await _auth.signOut();
     _jwtToken = null; // Clear JWT token on sign out
+    await _storage.delete(key: 'jwt_token');
   }
 }

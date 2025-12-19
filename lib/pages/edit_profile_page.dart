@@ -3,19 +3,21 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:alysa_speak/theme/app_color.dart';
 import 'package:alysa_speak/services/user_service.dart';
+import 'package:alysa_speak/models/user_model.dart';
 
-class OnboardingPage extends StatefulWidget {
-  const OnboardingPage({super.key});
+class EditProfilePage extends StatefulWidget {
+  final UserProfile? userProfile;
+  const EditProfilePage({super.key, this.userProfile});
 
   @override
-  State<OnboardingPage> createState() => _OnboardingPageState();
+  State<EditProfilePage> createState() => _EditProfilePageState();
 }
 
-class _OnboardingPageState extends State<OnboardingPage> {
+class _EditProfilePageState extends State<EditProfilePage> {
   final UserService _userService = UserService();
 
-  double _targetScore = 6.5;
-  int _dailyStudyTime = 30; // minutes
+  late double _targetScore;
+  late int _dailyStudyTime;
   DateTime? _testDate;
   bool _isLoading = false;
 
@@ -32,18 +34,15 @@ class _OnboardingPageState extends State<OnboardingPage> {
   ];
   final List<int> _timeOptions = [15, 30, 45, 60, 90, 120];
 
-  void _presentUnknownError() {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Please select a test date')));
+  @override
+  void initState() {
+    super.initState();
+    _targetScore = widget.userProfile?.targetScore ?? 6.5;
+    _dailyStudyTime = widget.userProfile?.dailyStudyTimeMinutes ?? 30;
+    _testDate = widget.userProfile?.testDate;
   }
 
   Future<void> _submit() async {
-    if (_testDate == null) {
-      _presentUnknownError();
-      return;
-    }
-
     setState(() {
       _isLoading = true;
     });
@@ -51,7 +50,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     final success = await _userService.updateUserProfile(
       targetScore: _targetScore,
       dailyStudyTimeMinutes: _dailyStudyTime,
-      testDate: _testDate!,
+      testDate: _testDate ?? DateTime.now().add(const Duration(days: 30)),
     );
 
     setState(() {
@@ -60,13 +59,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
     if (success) {
       if (mounted) {
-        Navigator.pushReplacementNamed(context, '/home');
+        Navigator.pop(context, true); // Return true to indicate success
       }
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Failed to save profile. Please try again.'),
+            content: Text('Failed to update profile. Please try again.'),
           ),
         );
       }
@@ -76,7 +75,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now().add(const Duration(days: 30)),
+      initialDate: _testDate ?? DateTime.now().add(const Duration(days: 30)),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
     );
@@ -91,6 +90,18 @@ class _OnboardingPageState extends State<OnboardingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Text(
+          "Edit Profile",
+          style: GoogleFonts.poppins(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: const BackButton(color: Colors.black),
+      ),
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -99,24 +110,14 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 20),
                     Text(
-                      "Let's personalize your plan",
+                      "Update your learning goals",
                       style: GoogleFonts.poppins(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Tell us your goals so we can tailor the learning experience for you.",
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
+                        fontSize: 16,
                         color: Colors.grey[600],
                       ),
                     ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 32),
 
                     // Target Score
                     Text(
@@ -241,7 +242,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                           ),
                         ),
                         child: Text(
-                          "Create Plan",
+                          "Save Changes",
                           style: GoogleFonts.poppins(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
