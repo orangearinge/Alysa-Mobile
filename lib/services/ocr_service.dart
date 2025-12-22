@@ -1,17 +1,23 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../config/api_constants.dart';
 
 class OcrService {
+  final _storage = const FlutterSecureStorage();
+
+  Future<String?> _getToken() async {
+    return await _storage.read(key: 'jwt_token');
+  }
+
   /// Upload dan proses gambar untuk OCR translation
-  /// 
+  ///
   /// [imageFile] - File gambar untuk mobile/desktop
   /// [webImage] - XFile untuk web platform
-  /// 
+  ///
   /// Returns Map dengan struktur:
   /// {
   ///   'message': String,
@@ -28,38 +34,31 @@ class OcrService {
         throw Exception('No image provided');
       }
 
-      // Ambil token dari SharedPreferences (opsional)
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('access_token');
+      // Ambil token dari Secure Storage
+      final token = await _getToken();
+
+      if (token == null || token.isEmpty) {
+        throw Exception('User not authenticated. Please log in again.');
+      }
 
       // Buat multipart request
       final uri = Uri.parse('${ApiConstants.baseUrl}/ocr/translate');
       final request = http.MultipartRequest('POST', uri);
 
-      // Set headers - hanya tambahkan Authorization jika token ada
-      if (token != null && token.isNotEmpty) {
-        request.headers['Authorization'] = 'Bearer $token';
-      }
-
+      // Set headers
+      request.headers['Authorization'] = 'Bearer $token';
 
       // Tambahkan file ke request
       if (kIsWeb && webImage != null) {
         // Untuk web platform
         final bytes = await webImage.readAsBytes();
         request.files.add(
-          http.MultipartFile.fromBytes(
-            'image',
-            bytes,
-            filename: webImage.name,
-          ),
+          http.MultipartFile.fromBytes('image', bytes, filename: webImage.name),
         );
       } else if (imageFile != null) {
         // Untuk mobile/desktop platform
         request.files.add(
-          await http.MultipartFile.fromPath(
-            'image',
-            imageFile.path,
-          ),
+          await http.MultipartFile.fromPath('image', imageFile.path),
         );
       }
 
@@ -80,7 +79,8 @@ class OcrService {
       } else {
         // Handle error response
         throw Exception(
-          responseData['error'] ?? 'Failed to process image: ${response.statusCode}',
+          responseData['error'] ??
+              'Failed to process image: ${response.statusCode}',
         );
       }
     } on SocketException {
@@ -92,18 +92,16 @@ class OcrService {
     }
   }
 
-  /// Get OCR history (optional - jika backend menyediakan endpoint)
   Future<List<Map<String, dynamic>>> getOcrHistory() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('access_token');
+      final token = await _getToken();
 
       if (token == null || token.isEmpty) {
         throw Exception('User not authenticated');
       }
 
       final response = await http.get(
-        Uri.parse('${ApiConstants.baseUrl}/ocr/history'),
+        Uri.parse('${ApiConstants.baseUrl}/user/ocr-history'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',

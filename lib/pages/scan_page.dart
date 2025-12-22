@@ -5,6 +5,7 @@ import 'package:camera/camera.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../services/ocr_service.dart';
+import 'ocr_result_page.dart';
 
 
 class ScanPage extends StatefulWidget {
@@ -151,56 +152,14 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   void _showResultDialog(Map<String, dynamic> result) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Hasil OCR Translation'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                result['message'] ?? 'Translation completed',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Result:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  result['result'].toString(),
-                  style: const TextStyle(fontSize: 14),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Record ID: ${result['record_id']}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade600,
-                ),
-              ),
-            ],
-          ),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => OcrResultPage(
+          ocrResult: result,
+          imageFile: _selectedFile,
+          webImage: _webImage,
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Tutup'),
-          ),
-        ],
       ),
     );
   }
