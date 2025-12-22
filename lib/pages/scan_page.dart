@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../services/ocr_service.dart';
 import 'ocr_result_page.dart';
+import 'ocr_history_page.dart';
 
 
 class ScanPage extends StatefulWidget {
@@ -195,6 +196,20 @@ class _ScanPageState extends State<ScanPage> {
         title: const Text("Scan / Upload Image"),
         centerTitle: true,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const OcrHistoryPage(),
+                ),
+              );
+            },
+            tooltip: 'OCR History',
+          ),
+        ],
       ),
       body: SafeArea(
         child: Padding(
