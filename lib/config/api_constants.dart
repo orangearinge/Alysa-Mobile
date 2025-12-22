@@ -16,4 +16,11 @@ class ApiConstants {
     }
     return 'http://127.0.0.1:5000/api/auth/firebase-login';
   }
+
+  static String get ocrUrl {
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return 'http://10.0.2.2:5000/api/ocr/translate';
+    }
+    return 'http://127.0.0.1:5000/api/ocr/translate';
+  }
 }

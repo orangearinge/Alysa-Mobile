@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../services/ocr_service.dart';
+
 
 class ScanPage extends StatefulWidget {
   const ScanPage({super.key});
@@ -18,8 +20,12 @@ class _ScanPageState extends State<ScanPage> {
   File? _selectedFile;
   XFile? _webImage;
   final ImagePicker picker = ImagePicker();
+  final OcrService _ocrService = OcrService();
 
   bool showCamera = false;
+  bool _isProcessing = false;
+  Map<String, dynamic>? _ocrResult;
+
 
   @override
   void dispose() {
@@ -96,7 +102,111 @@ class _ScanPageState extends State<ScanPage> {
     );
   }
 
+  Future<void> processImage() async {
+    if (_selectedFile == null && _webImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Silakan pilih atau ambil gambar terlebih dahulu'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isProcessing = true;
+      _ocrResult = null;
+    });
+
+    try {
+      final result = await _ocrService.translateImage(
+        imageFile: _selectedFile,
+        webImage: _webImage,
+      );
+
+      setState(() {
+        _ocrResult = result;
+        _isProcessing = false;
+      });
+
+      // Show result dialog
+      if (mounted) {
+        _showResultDialog(result);
+      }
+    } catch (e) {
+      setState(() {
+        _isProcessing = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    }
+  }
+
+  void _showResultDialog(Map<String, dynamic> result) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Hasil OCR Translation'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                result['message'] ?? 'Translation completed',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Result:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  result['result'].toString(),
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Record ID: ${result['record_id']}',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Tutup'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _button(String text, IconData icon, VoidCallback onPressed,
+
       {Color? color, Color? textColor}) {
     return SizedBox(
       width: double.infinity,
@@ -152,7 +262,27 @@ class _ScanPageState extends State<ScanPage> {
                 textColor: Colors.blue,
               ),
 
+              const SizedBox(height: 10),
+
+              // Process Image Button
+              if (_selectedFile != null || _webImage != null)
+                _isProcessing
+                    ? const SizedBox(
+                        height: 48,
+                        child: Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      )
+                    : _button(
+                        "Proses Gambar (OCR)",
+                        Icons.translate,
+                        processImage,
+                        color: Colors.green,
+                        textColor: Colors.white,
+                      ),
+
               const SizedBox(height: 20),
+
 
               // Camera Preview
               if (showCamera && cameraReady)
