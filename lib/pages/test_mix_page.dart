@@ -29,7 +29,7 @@ class _TestMixedPageState extends State<TestMixedPage> {
   
   // Timer related
   Timer? _timer;
-  int timeRemaining = 30; // 30 seconds per question
+  int timeRemaining = 180; // 3 minutes per question
   
   // Recording related
   bool isRecording = false;
@@ -75,7 +75,7 @@ class _TestMixedPageState extends State<TestMixedPage> {
 
   void _startTimer() {
     _timer?.cancel();
-    setState(() => timeRemaining = 30);
+    setState(() => timeRemaining = 180);
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (timeRemaining > 0) {
         setState(() => timeRemaining--);

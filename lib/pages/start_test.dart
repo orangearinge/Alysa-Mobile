@@ -192,7 +192,7 @@ class StartTest extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            '30s',
+                            '180s',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
