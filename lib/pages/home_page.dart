@@ -7,6 +7,8 @@ import 'package:alysa_speak/pages/scan_page.dart';
 import 'package:alysa_speak/pages/start_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:alysa_speak/pages/quiz_page.dart';
+import 'package:alysa_speak/services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -150,13 +152,22 @@ class _HomeContent extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        "Hello, User!", // Could be dynamic
-                        style: GoogleFonts.poppins(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
+                      StreamBuilder<User?>(
+                        stream: AuthService().authStateChanges,
+                        builder: (context, snapshot) {
+                          final user = snapshot.data;
+                          final displayName = user?.displayName ?? "User";
+                          final firstName = displayName.split(' ')[0];
+                          
+                          return Text(
+                            "Hello, $firstName!", 
+                            style: GoogleFonts.poppins(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          );
+                        },
                       ),
                       Text(
                         "Let's crack IELTS!",

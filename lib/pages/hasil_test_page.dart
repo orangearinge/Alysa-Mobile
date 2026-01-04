@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'test_review_page.dart';
 import 'package:alysa_speak/theme/app_color.dart';
-
+import 'package:alysa_speak/models/test_model.dart';
 
 class HasilTestPage extends StatelessWidget {
   final int correctAnswers;
   final int wrongAnswers;
   final int totalPoints;
-  final List<dynamic>? questions; // List soal untuk review
+  // Optional: keep questions if needed for other logic, but strictly use result for navigation
+  final PracticeTestResult? result;
 
   const HasilTestPage({
     super.key,
-    this.correctAnswers = 10,
-    this.wrongAnswers = 3,
-    this.totalPoints = 10,
-    this.questions,
+    this.correctAnswers = 0,
+    this.wrongAnswers = 0,
+    this.totalPoints = 0,
+    this.result,
   });
 
   @override
@@ -36,7 +37,7 @@ class HasilTestPage extends StatelessWidget {
                   color: Colors.orange.shade50,
                   shape: BoxShape.circle,
                 ),
-                child: Center(
+                child: const Center(
                   child: Text(
                     "🎉",
                     style: TextStyle(fontSize: 60),
@@ -48,7 +49,7 @@ class HasilTestPage extends StatelessWidget {
               // Title
               RichText(
                 textAlign: TextAlign.center,
-                text: TextSpan(
+                text: const TextSpan(
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -78,12 +79,12 @@ class HasilTestPage extends StatelessWidget {
                       color: Colors.grey.shade600,
                       height: 1.5,
                     ),
-                    children: [
-                      TextSpan(
+                    children: const [
+                       TextSpan(
                         text:
                             "Gear up for a quick quiz! You've got just and 30 seconds per question. Tap the info icon at the top right to check out the module each question comes from. Let's see what you've got! - ",
                       ),
-                      TextSpan(
+                       TextSpan(
                         text: "Goodluck!",
                         style: TextStyle(
                           color: AppColors.primary,
@@ -102,12 +103,12 @@ class HasilTestPage extends StatelessWidget {
                 children: [
                   // Correct Answers
                   Container(
-                    padding: EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: Colors.blue.shade50,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.check_circle,
                       color: AppColors.primary,
                       size: 20,
@@ -126,12 +127,12 @@ class HasilTestPage extends StatelessWidget {
 
                   // Wrong Answers
                   Container(
-                    padding: EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: Colors.red.shade50,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.close,
                       color: Colors.red,
                       size: 20,
@@ -153,7 +154,7 @@ class HasilTestPage extends StatelessWidget {
               // Points Earned
               Text(
                 "You've Earned ${totalPoints}Pts",
-                style: TextStyle(
+                style: const TextStyle(
                   color: AppColors.primary,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -168,24 +169,28 @@ class HasilTestPage extends StatelessWidget {
                 child: OutlinedButton(
                   onPressed: () {
                     // Navigate to review page
-                    if (questions != null) {
+                    if (result != null) {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => TestReviewPage(
-                            questions: questions!,
+                            result: result!,
                           ),
                         ),
                       );
+                    } else {
+                       ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Detailed review not available"))
+                       );
                     }
                   },
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: AppColors.primary, width: 2),
+                    side: const BorderSide(color: AppColors.primary, width: 2),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: Text(
+                  child: const Text(
                     "SHOW RESULT",
                     style: TextStyle(
                       color: AppColors.primary,
@@ -204,8 +209,8 @@ class HasilTestPage extends StatelessWidget {
                 height: 56,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Navigate to home
-                    Navigator.popUntil(context, (route) => route.isFirst);
+                     // Navigate to home and clear stack
+                     Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
@@ -214,7 +219,7 @@ class HasilTestPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: Text(
+                  child: const Text(
                     "HOME",
                     style: TextStyle(
                       color: Colors.white,

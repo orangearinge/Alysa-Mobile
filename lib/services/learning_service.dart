@@ -13,6 +13,7 @@ class LearningService {
         url += '?category=$category';
       }
 
+      print('DEBUG: Fetching lessons from $url');
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
@@ -21,6 +22,7 @@ class LearningService {
 
         return lessonsJson.map((json) => Lesson.fromJson(json)).toList();
       } else {
+        print('DEBUG: Failed to load lessons: ${response.statusCode} - ${response.body}');
         throw Exception('Failed to load lessons');
       }
     } catch (e) {
@@ -30,13 +32,16 @@ class LearningService {
   }
 
   Future<Lesson?> getLessonDetail(String lessonId) async {
+    final url = '$baseUrl/lessons/$lessonId';
     try {
-      final response = await http.get(Uri.parse('$baseUrl/lessons/$lessonId'));
+      print('DEBUG: Fetching lesson detail from $url');
+      final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> json = jsonDecode(response.body);
         return Lesson.fromJson(json);
       } else {
+        print('DEBUG: Failed to load lesson detail: ${response.statusCode} - ${response.body}');
         throw Exception('Failed to load lesson detail');
       }
     } catch (e) {
@@ -46,17 +51,21 @@ class LearningService {
   }
 
   Future<Quiz?> getQuiz(String quizId) async {
+    final urlStr = '$baseUrl/quizzes/$quizId';
     try {
-      final response = await http.get(Uri.parse('$baseUrl/quizzes/$quizId'));
+      print('DEBUG: Fetching quiz from $urlStr');
+      final response = await http.get(Uri.parse(urlStr));
 
+      print('DEBUG: Response status: ${response.statusCode}');
       if (response.statusCode == 200) {
         final Map<String, dynamic> json = jsonDecode(response.body);
         return Quiz.fromJson(json);
       } else {
-        throw Exception('Failed to load quiz');
+        print('DEBUG: Response body: ${response.body}');
+        throw Exception('Failed to load quiz: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error fetching quiz: $e');
+      print('Error fetching quiz ($urlStr): $e');
       return null;
     }
   }

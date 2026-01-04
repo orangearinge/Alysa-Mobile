@@ -53,11 +53,14 @@ class AuthService {
         if (kDebugMode) {
           print("Backend sync error: ${response.statusCode} ${response.body}");
         }
+        // Throw exception to propagate error to UI so user knows login failed
+        throw "Backend verification failed: ${response.statusCode}. Please try again.";
       }
     } catch (e) {
       if (kDebugMode) {
         print("Backend connection failed: $e");
       }
+      throw "Failed to connect to server: $e";
     }
   }
 

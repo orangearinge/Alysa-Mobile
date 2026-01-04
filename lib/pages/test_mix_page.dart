@@ -1,26 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:alysa_speak/models/test_model.dart';
+import 'package:alysa_speak/services/test_service.dart';
 import 'package:alysa_speak/theme/app_color.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'hasil_test_page.dart';
-
-enum QuestionType { writing, speaking }
-
-class TestQuestion {
-  final String text;
-  String userAnswer;
-  final String correctAnswer;
-  final String feedback;
-  final QuestionType type;
-
-  TestQuestion({
-    required this.text,
-    this.userAnswer = '',
-    required this.correctAnswer,
-    required this.feedback,
-    required this.type,
-  });
-
-  bool get isCorrect => userAnswer.toLowerCase().trim() == correctAnswer.toLowerCase().trim();
-}
+import 'test_review_page.dart';
 
 class TestMixedPage extends StatefulWidget {
   const TestMixedPage({super.key});
@@ -30,157 +15,223 @@ class TestMixedPage extends StatefulWidget {
 }
 
 class _TestMixedPageState extends State<TestMixedPage> {
+  final TestService _testService = TestService();
+  final stt.SpeechToText _speech = stt.SpeechToText();
+  
   final TextEditingController _answerController = TextEditingController();
+  
+  List<PracticeQuestion> questions = [];
   int currentQuestionIndex = 0;
-  int timeRemaining = 30;
+  int sessionId = 0;
+  
+  bool isLoading = true;
+  bool isSubmitting = false;
+  
+  // Timer related
+  Timer? _timer;
+  int timeRemaining = 30; // 30 seconds per question
+  
+  // Recording related
   bool isRecording = false;
+  bool isSpeechAvailable = false;
+  String spokenText = "";
 
-  // Daftar soal test (campuran writing dan speaking)
-  final List<TestQuestion> questions = [
-    TestQuestion(
-      text: "I have an apple",
-      correctAnswer: "I have an apple",
-      feedback: "Good! Simple present tense is correct.",
-      type: QuestionType.writing,
-    ),
-    TestQuestion(
-      text: "She is reading a book",
-      correctAnswer: "She is reading a book",
-      feedback: "Perfect! Present continuous tense.",
-      type: QuestionType.speaking,
-    ),
-    TestQuestion(
-      text: "They go to school",
-      correctAnswer: "They go to school",
-      feedback: "Excellent! Simple present for habits.",
-      type: QuestionType.writing,
-    ),
-    TestQuestion(
-      text: "We are playing football",
-      correctAnswer: "We are playing football",
-      feedback: "Great! Present continuous for ongoing actions.",
-      type: QuestionType.speaking,
-    ),
-    TestQuestion(
-      text: "He likes ice cream",
-      correctAnswer: "He likes ice cream",
-      feedback: "Correct! Third person singular verb.",
-      type: QuestionType.writing,
-    ),
-    TestQuestion(
-      text: "The cat is sleeping",
-      correctAnswer: "The cat is sleeping",
-      feedback: "Perfect! Present continuous tense.",
-      type: QuestionType.speaking,
-    ),
-    TestQuestion(
-      text: "I eat breakfast every day",
-      correctAnswer: "I eat breakfast every day",
-      feedback: "Good! Simple present for daily routines.",
-      type: QuestionType.writing,
-    ),
-    TestQuestion(
-      text: "She has a beautiful dress",
-      correctAnswer: "She has a beautiful dress",
-      feedback: "Excellent! Simple present with 'have'.",
-      type: QuestionType.speaking,
-    ),
-    TestQuestion(
-      text: "We are studying English",
-      correctAnswer: "We are studying English",
-      feedback: "Great! Present continuous tense.",
-      type: QuestionType.writing,
-    ),
-    TestQuestion(
-      text: "The birds fly in the sky",
-      correctAnswer: "The birds fly in the sky",
-      feedback: "Perfect! Simple present tense.",
-      type: QuestionType.speaking,
-    ),
-  ];
-
-  TestQuestion get currentQuestion => questions[currentQuestionIndex];
+  PracticeQuestion get currentQuestion => questions[currentQuestionIndex];
   bool get isLastQuestion => currentQuestionIndex >= questions.length - 1;
 
-  void _submitAnswer() {
-    // Simpan jawaban user
-    setState(() {
-      if (currentQuestion.type == QuestionType.writing) {
-        currentQuestion.userAnswer = _answerController.text;
-        _answerController.clear();
-      } else {
-        // Untuk speaking, simpan jawaban dummy atau dari speech recognition
-        currentQuestion.userAnswer = "Spoken answer"; // TODO: Ganti dengan hasil speech recognition
-      }
-    });
+  @override
+  void initState() {
+    super.initState();
+    _startTest();
+    _initSpeech();
+  }
 
-    if (isLastQuestion) {
-      // Jika soal terakhir, hitung hasil dan navigasi ke hasil test
-      int correctCount = questions.where((q) => q.isCorrect).length;
-      int wrongCount = questions.length - correctCount;
-      int points = correctCount;
+  void _initSpeech() async {
+    isSpeechAvailable = await _speech.initialize(
+        onError: (e) => print('Speech error: $e'),
+        onStatus: (s) => print('Speech status: $s'));
+    if (mounted) setState(() {});
+  }
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HasilTestPage(
-            correctAnswers: correctCount,
-            wrongAnswers: wrongCount,
-            totalPoints: points,
-            questions: questions,
-          ),
-        ),
-      );
-    } else {
-      // Lanjut ke soal berikutnya
+  Future<void> _startTest() async {
+    try {
+      final result = await _testService.startPracticeTest();
       setState(() {
-        currentQuestionIndex++;
-        timeRemaining = 30;
-        isRecording = false;
+        sessionId = result['session_id'];
+        questions = result['questions'];
+        isLoading = false;
       });
+      _startTimer();
+    } catch (e) {
+      if (mounted) {
+        setState(() => isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading test: $e')),
+        );
+        Navigator.pop(context);
+      }
     }
   }
 
-  void _toggleRecording() {
-    setState(() {
-      isRecording = !isRecording;
+  void _startTimer() {
+    _timer?.cancel();
+    setState(() => timeRemaining = 30);
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (timeRemaining > 0) {
+        setState(() => timeRemaining--);
+      } else {
+        // Time's up for this question, auto-submit/next
+        _submitCurrentAnswer();
+      }
     });
-    
-    // TODO: Implement speech recognition logic here
-    if (isRecording) {
-      print("Started recording...");
-      // Start recording
-    } else {
-      print("Stopped recording...");
-      // Stop recording and submit
-      Future.delayed(Duration(milliseconds: 500), () {
-        _submitAnswer();
-      });
-    }
+  }
+
+  void _stopTimer() {
+    _timer?.cancel();
   }
 
   @override
   void dispose() {
+    _timer?.cancel();
     _answerController.dispose();
+    _speech.stop();
     super.dispose();
+  }
+
+  void _submitCurrentAnswer() {
+    _stopTimer();
+    
+    // Save current answer
+    if (currentQuestion.section.toLowerCase() == 'writing') {
+      currentQuestion.userAnswer = _answerController.text.trim();
+      _answerController.clear();
+    } else {
+      // For speaking, spokenText is populated by speech listener
+      currentQuestion.userAnswer = spokenText.trim();
+      // Reset spoken text for next q
+      spokenText = "";
+      if (isRecording) {
+        _speech.stop();
+        setState(() => isRecording = false);
+      }
+    }
+
+    if (isLastQuestion) {
+      _finishTest();
+    } else {
+      setState(() {
+        currentQuestionIndex++;
+      });
+      _startTimer();
+    }
+  }
+
+  Future<void> _finishTest() async {
+    setState(() => isSubmitting = true);
+    try {
+      final result = await _testService.submitPracticeTest(sessionId, questions);
+      
+      if (mounted) {
+         // Calculate simple stats for the summary screen
+         int correctCount = result.results.where((r) => r.score >= 3.0).length;
+         int wrongCount = result.results.length - correctCount;
+         int totalPoints = (result.overallScore * 10).round(); 
+
+         Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HasilTestPage(
+              result: result,
+              correctAnswers: correctCount,
+              wrongAnswers: wrongCount,
+              totalPoints: totalPoints,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error submitting test: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => isSubmitting = false);
+    }
+  }
+
+  void _toggleRecording() async {
+    if (!isSpeechAvailable) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Speech recognition not available')),
+      );
+      return;
+    }
+
+    if (isRecording) {
+      _speech.stop();
+      setState(() => isRecording = false);
+    } else {
+      setState(() {
+        isRecording = true;
+        spokenText = ""; // clear previous
+      });
+      _speech.listen(
+        onResult: (result) {
+          setState(() {
+            spokenText = result.recognizedWords;
+          });
+        },
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    
+    if (isSubmitting) {
+       return const Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+            child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text("Evaluating answers with AI..."),
+          ],
+        )),
+      );
+    }
+
+    if (questions.isEmpty) {
+       return const Scaffold(
+        body: Center(child: Text("No questions loaded.")),
+      );
+    }
+
+    bool isWriting = currentQuestion.section.toLowerCase() == 'writing';
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
         title: Column(
           children: [
-            Text(
-              "TEST",
+            const Text(
+              "PRACTICE TEST",
               style: TextStyle(
                 color: Colors.black87,
                 fontWeight: FontWeight.bold,
@@ -188,14 +239,14 @@ class _TestMixedPageState extends State<TestMixedPage> {
               ),
             ),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.primary,
+                color: timeRemaining < 10 ? Colors.red : AppColors.primary,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
                 "$timeRemaining Seconds",
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
@@ -216,10 +267,8 @@ class _TestMixedPageState extends State<TestMixedPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    currentQuestion.type == QuestionType.writing
-                        ? "Writing"
-                        : "Speaking",
-                    style: TextStyle(
+                    isWriting ? "Writing" : "Speaking",
+                    style: const TextStyle(
                       color: AppColors.primary,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -241,15 +290,15 @@ class _TestMixedPageState extends State<TestMixedPage> {
               LinearProgressIndicator(
                 value: (currentQuestionIndex + 1) / questions.length,
                 backgroundColor: Colors.grey[300],
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
                 minHeight: 6,
               ),
               const SizedBox(height: 24),
 
               // Question Text
               Text(
-                currentQuestion.text,
-                style: TextStyle(
+                currentQuestion.prompt,
+                style: const TextStyle(
                   fontSize: 16,
                   color: Colors.black87,
                   fontWeight: FontWeight.w500,
@@ -259,7 +308,7 @@ class _TestMixedPageState extends State<TestMixedPage> {
               const Spacer(),
 
               // Dynamic Input based on question type
-              if (currentQuestion.type == QuestionType.writing) ...[
+              if (isWriting) ...[
                 // Writing Input
                 Container(
                   decoration: BoxDecoration(
@@ -269,7 +318,7 @@ class _TestMixedPageState extends State<TestMixedPage> {
                   ),
                   child: TextField(
                     controller: _answerController,
-                    maxLines: 1,
+                    maxLines: 3,
                     decoration: InputDecoration(
                       hintText: "Type your Answer ...",
                       hintStyle: TextStyle(
@@ -277,83 +326,85 @@ class _TestMixedPageState extends State<TestMixedPage> {
                         fontSize: 14,
                       ),
                       border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(
+                      contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 14,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
-
-                // Submit Button for Writing
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: ElevatedButton(
-                    onPressed: _submitAnswer,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      "NEXT",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
-                ),
               ] else ...[
-                // Speaking Input (Microphone Button)
-                Center(
-                  child: Column(
+                // Speaking Input (Microphone Button and Live Text)
+                Column(
                     children: [
+                      if (spokenText.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            spokenText,
+                            style: const TextStyle(fontStyle: FontStyle.italic),
+                          ),
+                        ),
+                      const SizedBox(height: 10),
                       GestureDetector(
                         onTap: _toggleRecording,
                         child: Container(
-                          width: 120,
-                          height: 120,
+                          width: 80,
+                          height: 80,
                           decoration: BoxDecoration(
-                            color: AppColors.primary,
+                            color: isRecording ? Colors.red : AppColors.primary,
                             shape: BoxShape.circle,
-                            boxShadow: isRecording
-                                ? [
-                                    BoxShadow(
-                                      color: AppColors.primary.withOpacity(0.3),
-                                      blurRadius: 20,
-                                      spreadRadius: 5,
-                                    )
-                                  ]
-                                : [],
+                            boxShadow: [
+                                  BoxShadow(
+                                    color: (isRecording ? Colors.red : AppColors.primary).withOpacity(0.3),
+                                    blurRadius: 10,
+                                    spreadRadius: 2,
+                                  )
+                                ],
                           ),
                           child: Icon(
-                            Icons.mic,
+                            isRecording ? Icons.stop : Icons.mic,
                             color: Colors.white,
-                            size: 50,
+                            size: 40,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        isRecording ? "Recording..." : "Tap to Speak",
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
+                       const SizedBox(height: 8),
+                       Text(isRecording ? "Listening..." : "Tap to Speak")
                     ],
+                )
+              ],
+              
+              const SizedBox(height: 24),
+
+              // Next Button (Always visible to force stop/submit)
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: _submitCurrentAnswer,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    isLastQuestion ? "FINISH TEST" : "NEXT QUESTION",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      letterSpacing: 0.5,
+                    ),
                   ),
                 ),
-              ],
-
+              ),
               const SizedBox(height: 16),
             ],
           ),

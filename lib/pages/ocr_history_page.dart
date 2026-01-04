@@ -63,7 +63,13 @@ class _OcrHistoryPageState extends State<OcrHistoryPage> {
   String _formatDate(String? dateString) {
     if (dateString == null) return 'Unknown date';
     try {
-      final date = DateTime.parse(dateString);
+      DateTime date;
+      if (dateString.endsWith('Z')) {
+        date = DateTime.parse(dateString);
+      } else {
+        date = DateTime.parse('${dateString}Z');
+      }
+      date = date.toLocal();
       final now = DateTime.now();
       final difference = now.difference(date);
 

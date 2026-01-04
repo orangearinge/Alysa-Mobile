@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:alysa_speak/theme/app_color.dart';
+import 'package:alysa_speak/models/test_model.dart';
 
 class TestReviewPage extends StatefulWidget {
-  final List<dynamic> questions;
+  final PracticeTestResult result;
 
-  const TestReviewPage({super.key, required this.questions});
+  const TestReviewPage({super.key, required this.result});
 
   @override
   State<TestReviewPage> createState() => _TestReviewPageState();
@@ -14,155 +15,8 @@ class TestReviewPage extends StatefulWidget {
 class _TestReviewPageState extends State<TestReviewPage> {
   int currentQuestionIndex = 0;
 
-  dynamic get currentQuestion => widget.questions[currentQuestionIndex];
-  bool get isLastQuestion => currentQuestionIndex >= widget.questions.length - 1;
-
-  // Fungsi untuk menampilkan popup hasil
-  void _showResultPopup(BuildContext context) {
-    final question = currentQuestion;
-    final bool isCorrect = question.isCorrect;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.secondary,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-      ),
-      builder: (context) {
-        return FractionallySizedBox(
-          heightFactor: 0.5,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Bagian atas (garis + teks)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        FaIcon(
-                          isCorrect
-                              ? FontAwesomeIcons.circleCheck
-                              : FontAwesomeIcons.circleXmark,
-                          color: isCorrect ? Colors.green : Colors.red,
-                          size: 22,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          isCorrect ? 'Benar! 🎉' : 'Salah 🥺',
-                          style: TextStyle(
-                            color: isCorrect ? Colors.green : Colors.red,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Jawaban Anda: ${question.userAnswer.isEmpty ? "(Kosong)" : question.userAnswer}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade700,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    if (!isCorrect) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        'Jawaban Benar: ${question.correctAnswer}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.green.shade700,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 16),
-                    Text(
-                      question.feedback,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade800,
-                        height: 1.5,
-                      ),
-                    ),
-                  ],
-                ),
-
-                // Bagian bawah (tombol)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 45,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        if (isLastQuestion) {
-                          // Kembali ke home jika sudah soal terakhir
-                          Navigator.pushNamed(context, '/home');
-                        } else {
-                          // Lanjut ke soal berikutnya
-                          setState(() {
-                            currentQuestionIndex++;
-                          });
-                          // Tampilkan popup untuk soal berikutnya
-                          Future.delayed(Duration(milliseconds: 300), () {
-                            if (mounted) _showResultPopup(context);
-                          });
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: Text(
-                        isLastQuestion ? 'FINISH' : 'NEXT',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    // Tidak perlu auto-popup lagi, karena sudah ada tombol manual
-  }
+  PracticeResultDetail get currentResult => widget.result.results[currentQuestionIndex];
+  bool get isLastQuestion => currentQuestionIndex >= widget.result.results.length - 1;
 
   @override
   Widget build(BuildContext context) {
@@ -174,11 +28,12 @@ class _TestReviewPageState extends State<TestReviewPage> {
         leading: IconButton(
           icon: const FaIcon(FontAwesomeIcons.arrowLeft, color: Colors.black),
           onPressed: () {
-            Navigator.pop(context);
+            // Navigator.pop(context); // Do not use pop to prevent going back to test
+            Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
           },
         ),
-        title: Text(
-          "Review Jawaban",
+        title: const Text(
+          "Review Results",
           style: TextStyle(
             color: Colors.black87,
             fontWeight: FontWeight.bold,
@@ -193,11 +48,36 @@ class _TestReviewPageState extends State<TestReviewPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Overall Score Summary
+              if (currentQuestionIndex == 0) ...[
+                 Center(
+                   child: Column(
+                     children: [
+                       Text(
+                         "Overall Score",
+                         style: TextStyle(color: Colors.grey.shade600),
+                       ),
+                       const SizedBox(height: 8),
+                       Text(
+                         "${widget.result.overallScore.toStringAsFixed(1)} / 5.0",
+                         style: const TextStyle(
+                           fontSize: 32,
+                           fontWeight: FontWeight.bold,
+                           color: AppColors.primary
+                         ),
+                       ),
+                       const SizedBox(height: 24),
+                       const Divider(),
+                     ],
+                   ),
+                 )
+              ],
+            
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Question ${currentQuestionIndex + 1}/${widget.questions.length}',
+                    'Question ${currentQuestionIndex + 1}/${widget.result.results.length}',
                     style: const TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w600,
@@ -205,29 +85,19 @@ class _TestReviewPageState extends State<TestReviewPage> {
                     ),
                   ),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: currentQuestion.isCorrect
-                          ? Colors.green.shade50
-                          : Colors.red.shade50,
+                      color: _getScoreColor(currentResult.score).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
                       children: [
-                        Icon(
-                          currentQuestion.isCorrect ? Icons.check : Icons.close,
-                          color: currentQuestion.isCorrect
-                              ? Colors.green
-                              : Colors.red,
-                          size: 16,
-                        ),
-                        SizedBox(width: 4),
+                        const FaIcon(FontAwesomeIcons.star, size: 14, color: Colors.amber),
+                        const SizedBox(width: 4),
                         Text(
-                          currentQuestion.isCorrect ? 'Benar' : 'Salah',
+                          '${currentResult.score}/5',
                           style: TextStyle(
-                            color: currentQuestion.isCorrect
-                                ? Colors.green
-                                : Colors.red,
+                            color: _getScoreColor(currentResult.score),
                             fontWeight: FontWeight.w600,
                             fontSize: 12,
                           ),
@@ -240,7 +110,7 @@ class _TestReviewPageState extends State<TestReviewPage> {
               const SizedBox(height: 16),
               // Progress bar
               LinearProgressIndicator(
-                value: (currentQuestionIndex + 1) / widget.questions.length,
+                value: (currentQuestionIndex + 1) / widget.result.results.length,
                 backgroundColor: Colors.grey[300],
                 valueColor: const AlwaysStoppedAnimation<Color>(
                   AppColors.primary,
@@ -248,90 +118,80 @@ class _TestReviewPageState extends State<TestReviewPage> {
                 minHeight: 6,
               ),
               const SizedBox(height: 32),
+              
+              // Helper text for context since we don't have the original prompt here easily
+              // In a real app we might pass the Questions list too, but for now we focus on feedback
               Text(
-                currentQuestion.text,
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.black87,
-                  fontWeight: FontWeight.w500,
-                ),
+                "Your Answer:",
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 8),
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.grey.shade50,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: currentQuestion.isCorrect
-                        ? Colors.green.shade200
-                        : Colors.red.shade200,
-                    width: 2,
+                    color: Colors.grey.shade300,
+                  ),
+                ),
+                child: Text(
+                  currentResult.userAnswer.isEmpty
+                      ? "(No answer provided)"
+                      : currentResult.userAnswer,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 24),
+              Text(
+                "AI Feedback:",
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.blue.shade200,
                   ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Jawaban Anda:',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
-                        fontWeight: FontWeight.w500,
-                      ),
+                  children: currentResult.feedback.map((f) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.only(top: 6.0),
+                          child: Icon(Icons.circle, size: 6, color: Colors.blue),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            f,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.blue.shade900,
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    SizedBox(height: 8),
-                    Text(
-                      currentQuestion.userAnswer.isEmpty
-                          ? "(Tidak dijawab)"
-                          : currentQuestion.userAnswer,
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: Colors.black87,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
+                  )).toList(),
                 ),
               ),
-              if (!currentQuestion.isCorrect) ...[
-                const SizedBox(height: 16),
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.green.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.green.shade200,
-                      width: 2,
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Jawaban Benar:',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade600,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        currentQuestion.correctAnswer,
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: Colors.green.shade800,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+
               const SizedBox(height: 32),
               // Tombol manual untuk next/finish
               SizedBox(
@@ -341,7 +201,7 @@ class _TestReviewPageState extends State<TestReviewPage> {
                   onPressed: () {
                     if (isLastQuestion) {
                       // Kembali ke home
-                      Navigator.pushNamed(context, '/home');
+                      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
                     } else {
                       // Lanjut ke soal berikutnya
                       setState(() {
@@ -356,7 +216,7 @@ class _TestReviewPageState extends State<TestReviewPage> {
                     ),
                   ),
                   child: Text(
-                    isLastQuestion ? 'FINISH' : 'NEXT',
+                    isLastQuestion ? 'FINISH & HOME' : 'NEXT RESULT',
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -372,5 +232,11 @@ class _TestReviewPageState extends State<TestReviewPage> {
         ),
       ),
     );
+  }
+
+  Color _getScoreColor(double score) {
+    if (score >= 4.0) return Colors.green;
+    if (score >= 3.0) return Colors.orange;
+    return Colors.red;
   }
 }
