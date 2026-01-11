@@ -33,87 +33,97 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
-Widget build(BuildContext context) {
-  final List<Widget> _pages = [_HomeContent(), const ScanPage(), const ProfilePage()];
+  Widget build(BuildContext context) {
+    final List<Widget> _pages = [_HomeContent(), ScanPage(), ProfilePage()];
 
-  return Scaffold(
-    extendBody: true,
-    backgroundColor: Colors.white,
-    // Gunakan Stack pada level paling atas di body untuk membungkus semua halaman
-    body: Stack(
-      children: [
-        // 1. Konten Halaman Utama
-        _pages[_selectedIndex],
-
-        // 2. Tombol Chatbot (Akan muncul di semua halaman: Home, Scan, Profile)
-        Positioned(
-          bottom: -39, // Posisi di atas BottomAppBar
-          right: 20,
-          child: GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ChatbotPage()),
-              );
-            },
-            child: Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withOpacity(0.4),
-                    blurRadius: 12,
-                    offset: const Offset(0, 6),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Stack(
+        children: [
+          _pages[_selectedIndex],
+          Positioned(
+            bottom: 10,
+            right: 16,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ChatbotPage(),
                   ),
-                ],
-              ),
-              child: const Icon(
-                Icons.chat_bubble_rounded,
-                color: Colors.white,
-                size: 26,
+                );
+              },
+              child: Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.4),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.chat_bubble_outline,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                ),
               ),
             ),
           ),
-        ),
-      ],
-    ),
-    
-    // Floating Action Button (Kamera)
-    floatingActionButton: SizedBox(
-      height: 72,
-      width: 72,
-      child: FloatingActionButton(
-        onPressed: _onFabTapped,
-        backgroundColor: AppColors.primary,
-        elevation: 8,
-        shape: const CircleBorder(),
-        child: const Icon(FontAwesomeIcons.camera, color: Colors.white, size: 28),
+        ],
       ),
-    ),
-    floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-    
-    // Bottom Navigation Bar
-    bottomNavigationBar: BottomAppBar(
-      shape: const CircularNotchedRectangle(),
-      notchMargin: 8.0,
-      color: AppColors.secondary,
-      child: SizedBox(
-        height: 60,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildNavItem(icon: FontAwesomeIcons.house, text: "Home", index: 0),
-            const SizedBox(width: 40), // Ruang untuk FAB Kamera
-            _buildNavItem(icon: FontAwesomeIcons.user, text: "Profile", index: 2),
-          ],
+      floatingActionButton: SizedBox(
+        height: 75,
+        width: 75,
+        child: FloatingActionButton(
+          onPressed: _onFabTapped,
+          child: Icon(FontAwesomeIcons.camera, color: Colors.white),
+          backgroundColor: AppColors.primary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(50),
+          ),
+          elevation: 10.0,
         ),
       ),
-    ),
-  );
-}
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: BottomAppBar(
+        shape: AutomaticNotchedShape(
+          const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+          ),
+          const CircleBorder(),
+        ),
+        color: AppColors.secondary,
+        notchMargin: 8.0,
+        clipBehavior: Clip.antiAlias,
+        child: Container(
+          height: 70,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              _buildNavItem(
+                icon: FontAwesomeIcons.house,
+                text: "Home",
+                index: 0,
+              ),
+              _buildNavItem(
+                icon: FontAwesomeIcons.user,
+                text: "Profile",
+                index: 2,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget _buildNavItem({
     IconData? icon,
@@ -170,7 +180,6 @@ class _HomeContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      bottom: false,
       child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
