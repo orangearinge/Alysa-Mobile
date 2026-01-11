@@ -41,44 +41,43 @@ class _HomePageState extends State<HomePage> {
       body: Stack(
         children: [
           _pages[_selectedIndex],
-          // Chatbot Button - show on all pages EXCEPT ScanPage (index 1)
-          if (_selectedIndex != 1)
-            Positioned(
-              bottom: 20,
-              right: 16,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ChatbotPage(),
-                    ),
-                  );
-                },
-                child: Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primary.withOpacity(0.4),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+          // Chatbot Button - positioned above navbar, bottom right
+          Positioned(
+            bottom: 20, 
+            right: 16,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ChatbotPage(),
                   ),
-                  child: Center(
-                    child: Icon(
-                      Icons.chat_bubble_outline,
-                      color: Colors.white,
-                      size: 28,
+                );
+              },
+              child: Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.4),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
                     ),
+                  ],
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.chat_bubble_outline,
+                    color: Colors.white,
+                    size: 28,
                   ),
                 ),
               ),
             ),
+          ),
         ],
       ),
       floatingActionButton: SizedBox(
