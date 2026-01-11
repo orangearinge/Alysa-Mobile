@@ -17,20 +17,20 @@ class TestMixedPage extends StatefulWidget {
 class _TestMixedPageState extends State<TestMixedPage> {
   final TestService _testService = TestService();
   final stt.SpeechToText _speech = stt.SpeechToText();
-  
+
   final TextEditingController _answerController = TextEditingController();
-  
+
   List<PracticeQuestion> questions = [];
   int currentQuestionIndex = 0;
   int sessionId = 0;
-  
+
   bool isLoading = true;
   bool isSubmitting = false;
-  
+
   // Timer related
   Timer? _timer;
   int timeRemaining = 180; // 3 minutes per question
-  
+
   // Recording related
   bool isRecording = false;
   bool isSpeechAvailable = false;
@@ -48,8 +48,9 @@ class _TestMixedPageState extends State<TestMixedPage> {
 
   void _initSpeech() async {
     isSpeechAvailable = await _speech.initialize(
-        onError: (e) => print('Speech error: $e'),
-        onStatus: (s) => print('Speech status: $s'));
+      onError: (e) => print('Speech error: $e'),
+      onStatus: (s) => print('Speech status: $s'),
+    );
     if (mounted) setState(() {});
   }
 
@@ -65,9 +66,9 @@ class _TestMixedPageState extends State<TestMixedPage> {
     } catch (e) {
       if (mounted) {
         setState(() => isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading test: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading test: $e')));
         Navigator.pop(context);
       }
     }
@@ -100,7 +101,7 @@ class _TestMixedPageState extends State<TestMixedPage> {
 
   void _submitCurrentAnswer() {
     _stopTimer();
-    
+
     // Save current answer
     if (currentQuestion.section.toLowerCase() == 'writing') {
       currentQuestion.userAnswer = _answerController.text.trim();
@@ -129,15 +130,18 @@ class _TestMixedPageState extends State<TestMixedPage> {
   Future<void> _finishTest() async {
     setState(() => isSubmitting = true);
     try {
-      final result = await _testService.submitPracticeTest(sessionId, questions);
-      
-      if (mounted) {
-         // Calculate simple stats for the summary screen
-         int correctCount = result.results.where((r) => r.score >= 3.0).length;
-         int wrongCount = result.results.length - correctCount;
-         int totalPoints = (result.overallScore * 10).round(); 
+      final result = await _testService.submitPracticeTest(
+        sessionId,
+        questions,
+      );
 
-         Navigator.pushReplacement(
+      if (mounted) {
+        // Calculate simple stats for the summary screen
+        int correctCount = result.results.where((r) => r.score >= 3.0).length;
+        int wrongCount = result.results.length - correctCount;
+        int totalPoints = (result.overallScore * 10).round();
+
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => HasilTestPage(
@@ -151,9 +155,9 @@ class _TestMixedPageState extends State<TestMixedPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error submitting test: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error submitting test: $e')));
       }
     } finally {
       if (mounted) setState(() => isSubmitting = false);
@@ -194,26 +198,25 @@ class _TestMixedPageState extends State<TestMixedPage> {
         body: Center(child: CircularProgressIndicator()),
       );
     }
-    
+
     if (isSubmitting) {
-       return const Scaffold(
+      return const Scaffold(
         backgroundColor: Colors.white,
         body: Center(
-            child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text("Evaluating answers with AI..."),
-          ],
-        )),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text("Evaluating answers with AI..."),
+            ],
+          ),
+        ),
       );
     }
 
     if (questions.isEmpty) {
-       return const Scaffold(
-        body: Center(child: Text("No questions loaded.")),
-      );
+      return const Scaffold(body: Center(child: Text("No questions loaded.")));
     }
 
     bool isWriting = currentQuestion.section.toLowerCase() == 'writing';
@@ -290,7 +293,9 @@ class _TestMixedPageState extends State<TestMixedPage> {
               LinearProgressIndicator(
                 value: (currentQuestionIndex + 1) / questions.length,
                 backgroundColor: Colors.grey[300],
-                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                  AppColors.primary,
+                ),
                 minHeight: 6,
               ),
               const SizedBox(height: 24),
@@ -335,10 +340,20 @@ class _TestMixedPageState extends State<TestMixedPage> {
                 ),
               ] else ...[
                 // Speaking Input (Microphone Button and Live Text)
-                Column(
+                SizedBox(
+                  width: double
+                      .infinity, // Memastikan area mengambil lebar penuh layar
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment
+                        .center, 
+                    crossAxisAlignment:
+                        CrossAxisAlignment.center, 
                     children: [
                       if (spokenText.isNotEmpty)
                         Container(
+                          margin: const EdgeInsets.only(
+                            bottom: 20,
+                          ), // Tambah margin agar tidak nempel ke mic
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: Colors.grey.shade100,
@@ -346,10 +361,12 @@ class _TestMixedPageState extends State<TestMixedPage> {
                           ),
                           child: Text(
                             spokenText,
+                            textAlign:
+                                TextAlign.center, // Text juga dibuat tengah
                             style: const TextStyle(fontStyle: FontStyle.italic),
                           ),
                         ),
-                      const SizedBox(height: 10),
+
                       GestureDetector(
                         onTap: _toggleRecording,
                         child: Container(
@@ -359,12 +376,16 @@ class _TestMixedPageState extends State<TestMixedPage> {
                             color: isRecording ? Colors.red : AppColors.primary,
                             shape: BoxShape.circle,
                             boxShadow: [
-                                  BoxShadow(
-                                    color: (isRecording ? Colors.red : AppColors.primary).withOpacity(0.3),
-                                    blurRadius: 10,
-                                    spreadRadius: 2,
-                                  )
-                                ],
+                              BoxShadow(
+                                color:
+                                    (isRecording
+                                            ? Colors.red
+                                            : AppColors.primary)
+                                        .withOpacity(0.3),
+                                blurRadius: 10,
+                                spreadRadius: 2,
+                              ),
+                            ],
                           ),
                           child: Icon(
                             isRecording ? Icons.stop : Icons.mic,
@@ -373,12 +394,21 @@ class _TestMixedPageState extends State<TestMixedPage> {
                           ),
                         ),
                       ),
-                       const SizedBox(height: 8),
-                       Text(isRecording ? "Listening..." : "Tap to Speak")
+                      const SizedBox(height: 12),
+                      Text(
+                        isRecording ? "Listening..." : "Tap to Speak",
+                        style: TextStyle(
+                          color: isRecording
+                              ? Colors.red
+                              : Colors.grey.shade700,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ],
-                )
+                  ),
+                ),
               ],
-              
+
               const SizedBox(height: 24),
 
               // Next Button (Always visible to force stop/submit)
