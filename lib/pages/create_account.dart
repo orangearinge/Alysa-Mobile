@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:alysa_speak/theme/app_color.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:alysa_speak/services/auth_service.dart';
+import 'package:alysa_speak/services/user_service.dart';
 
 class CreateAccountPage extends StatefulWidget {
   const CreateAccountPage({super.key});
@@ -16,6 +17,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   final confirmPasswordController = TextEditingController();
 
   final AuthService _authService = AuthService();
+  final UserService _userService = UserService();
   bool _isLoading = false;
   String? errorMessage;
 
@@ -48,6 +50,40 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
           '/onboarding',
           (route) => false,
         );
+      }
+    } catch (e) {
+      setState(() => errorMessage = e.toString());
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _handleGoogleSignUp() async {
+    setState(() => _isLoading = true);
+    try {
+      await _authService.signInWithGoogle();
+      
+      // Check if user profile is complete
+      final userProfile = await _userService.getUserProfile();
+      
+      if (mounted) {
+        // If profile doesn't have target_score, test_date, or daily time, go to onboarding
+        if (userProfile == null || 
+            userProfile.targetScore == null || 
+            userProfile.testDate == null) {
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/onboarding',
+            (route) => false,
+          );
+        } else {
+          // Profile complete, go to home
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/home',
+            (route) => false,
+          );
+        }
       }
     } catch (e) {
       setState(() => errorMessage = e.toString());
@@ -223,6 +259,56 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                 const Text(
                   'Already have an account',
                   style: TextStyle(color: Colors.black54, fontSize: 14),
+                ),
+
+                const SizedBox(height: 20),
+
+                // OR divider
+                Row(
+                  children: [
+                    Expanded(
+                      child: Divider(color: Colors.grey[300], thickness: 1),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(
+                        "or",
+                        style: GoogleFonts.poppins(color: Colors.grey),
+                      ),
+                    ),
+                    Expanded(
+                      child: Divider(color: Colors.grey[300], thickness: 1),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Google sign-up button
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: OutlinedButton.icon(
+                    onPressed: _isLoading ? null : _handleGoogleSignUp,
+                    icon: Image.asset(
+                      'assets/images/Google.png',
+                      width: 40,
+                      height: 40,
+                    ),
+                    label: Text(
+                      "Continue with Google",
+                      style: GoogleFonts.poppins(
+                        color: Colors.black87,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.grey),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
