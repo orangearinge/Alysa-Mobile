@@ -27,8 +27,14 @@ class _ProfilePageState extends State<ProfilePage> {
 
   void _loadUserProfile() {
     setState(() {
-      _userProfileFuture = _userService.getUserProfile().then((profile) {
-        _currentUserProfile = profile;
+      _userProfileFuture = _userService.getUserProfile().then((
+        UserProfile? profile,
+      ) {
+        if (mounted) {
+          setState(() {
+            _currentUserProfile = profile;
+          });
+        }
         return profile;
       });
     });
@@ -86,7 +92,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     const SizedBox(height: 16),
                     // Name
                     Text(
-                      user?.displayName ?? "User",
+                      _currentUserProfile?.username ??
+                          user?.displayName ??
+                          "User",
                       style: GoogleFonts.poppins(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,

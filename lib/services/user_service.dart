@@ -3,6 +3,7 @@ import 'package:alysa_speak/models/user_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:alysa_speak/config/api_constants.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase;
 
 class UserService {
   final String baseUrl = ApiConstants.baseUrl;
@@ -37,32 +38,47 @@ class UserService {
     }
   }
 
-  Future<bool> updateUserProfile({
+  Future<void> updateUserProfile({
+    String? username,
+    String? email,
     required double targetScore,
     required int dailyStudyTimeMinutes,
     required DateTime testDate,
   }) async {
-    try {
-      final token = await _getToken();
-      if (token == null) return false;
+    final token = await _getToken();
+    if (token == null) throw Exception('Authentication token not found');
 
-      final response = await http.put(
-        Uri.parse('$baseUrl/user/profile'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'target_score': targetScore,
-          'daily_study_time_minutes': dailyStudyTimeMinutes,
-          'test_date': testDate.toIso8601String(),
-        }),
-      );
+    final currentUser = firebase.FirebaseAuth.instance.currentUser;
 
-      return response.statusCode == 200;
-    } catch (e) {
-      print('Error updating user profile: $e');
-      return false;
+    // Update Firebase Profile
+    if (username != null) {
+      await currentUser?.updateDisplayName(username);
+    }
+    if (email != null && email != currentUser?.email) {
+      await currentUser?.verifyBeforeUpdateEmail(email);
+    }
+
+    final Map<String, dynamic> body = {
+      'target_score': targetScore,
+      'daily_study_time_minutes': dailyStudyTimeMinutes,
+      'test_date': testDate.toIso8601String(),
+    };
+
+    if (username != null) body['username'] = username;
+    if (email != null) body['email'] = email;
+
+    final response = await http.put(
+      Uri.parse('$baseUrl/user/profile'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode != 200) {
+      final errorData = jsonDecode(response.body);
+      throw Exception(errorData['error'] ?? 'Failed to update profile');
     }
   }
 }
