@@ -7,19 +7,19 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class TestService {
   final _storage = const FlutterSecureStorage();
-  
+
   // Custom API endpoint getter for practice
   String get _practiceStartUrl {
-     // Assuming ApiConstants has baseUrl. We append our path.
-     // This is a quick workaround if ApiConstants doesn't have practice url yet.
-     // Ideally we add it to ApiConstants but constructing it safely works too.
-     String base = ApiConstants.baseUrl; 
-     return '$base/test/practice/start';
+    // Assuming ApiConstants has baseUrl. We append our path.
+    // This is a quick workaround if ApiConstants doesn't have practice url yet.
+    // Ideally we add it to ApiConstants but constructing it safely works too.
+    String base = ApiConstants.baseUrl;
+    return '$base/test/practice/start';
   }
-  
+
   String get _practiceSubmitUrl {
-     String base = ApiConstants.baseUrl; 
-     return '$base/test/practice/submit';
+    String base = ApiConstants.baseUrl;
+    return '$base/test/practice/submit';
   }
 
   Future<String?> _getToken() async {
@@ -46,11 +46,8 @@ class TestService {
         List<PracticeQuestion> questions = rawQuestions
             .map((q) => PracticeQuestion.fromJson(q))
             .toList();
-            
-        return {
-          'session_id': data['session_id'],
-          'questions': questions
-        };
+
+        return {'session_id': data['session_id'], 'questions': questions};
       } else {
         throw "Failed to start test: ${response.body}";
       }
@@ -60,17 +57,25 @@ class TestService {
   }
 
   // Submit Practice Test
-  Future<PracticeTestResult> submitPracticeTest(int sessionId, List<PracticeQuestion> questions) async {
+  Future<PracticeTestResult> submitPracticeTest(
+    int sessionId,
+    List<PracticeQuestion> questions, {
+    String modelType = 'gemini',
+  }) async {
     final token = await _getToken();
     if (token == null) throw "Authentication required";
 
     try {
       // Prepare payload
-      List<Map<String, dynamic>> answersPayload = questions.map((q) => {
-        'question_id': q.questionId,
-        'answer': q.userAnswer ?? '',
-        'section': q.section
-      }).toList();
+      List<Map<String, dynamic>> answersPayload = questions
+          .map(
+            (q) => {
+              'question_id': q.questionId,
+              'answer': q.userAnswer ?? '',
+              'section': q.section,
+            },
+          )
+          .toList();
 
       final response = await http.post(
         Uri.parse(_practiceSubmitUrl),
@@ -80,7 +85,8 @@ class TestService {
         },
         body: jsonEncode({
           'session_id': sessionId,
-          'answers': answersPayload
+          'answers': answersPayload,
+          'model': modelType,
         }),
       );
 

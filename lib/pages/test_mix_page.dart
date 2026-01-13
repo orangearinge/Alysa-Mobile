@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:alysa_speak/models/test_model.dart';
 import 'package:alysa_speak/services/test_service.dart';
 import 'package:alysa_speak/theme/app_color.dart';
@@ -130,9 +131,14 @@ class _TestMixedPageState extends State<TestMixedPage> {
   Future<void> _finishTest() async {
     setState(() => isSubmitting = true);
     try {
+      // Get selected model
+      final prefs = await SharedPreferences.getInstance();
+      String modelType = prefs.getString('selected_ai_model') ?? 'gemini';
+
       final result = await _testService.submitPracticeTest(
         sessionId,
         questions,
+        modelType: modelType,
       );
 
       if (mounted) {
@@ -344,10 +350,8 @@ class _TestMixedPageState extends State<TestMixedPage> {
                   width: double
                       .infinity, // Memastikan area mengambil lebar penuh layar
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment
-                        .center, 
-                    crossAxisAlignment:
-                        CrossAxisAlignment.center, 
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       if (spokenText.isNotEmpty)
                         Container(

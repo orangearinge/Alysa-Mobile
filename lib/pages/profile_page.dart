@@ -1,5 +1,6 @@
 import 'package:alysa_speak/theme/app_color.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:alysa_speak/services/auth_service.dart';
 import 'package:alysa_speak/services/user_service.dart';
 import 'package:alysa_speak/models/user_model.dart';
@@ -18,11 +19,30 @@ class _ProfilePageState extends State<ProfilePage> {
   final UserService _userService = UserService();
   Future<UserProfile?>? _userProfileFuture;
   UserProfile? _currentUserProfile;
+  String _selectedModel = 'gemini'; // Default
 
   @override
   void initState() {
     super.initState();
     _loadUserProfile();
+    _loadModelPreference();
+  }
+
+  Future<void> _loadModelPreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      // Default to 'gemini' (false). If saved is 'alysa', set true.
+      String? savedModel = prefs.getString('selected_ai_model');
+      _selectedModel = savedModel ?? 'gemini';
+    });
+  }
+
+  Future<void> _saveModelPreference(String model) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selected_ai_model', model);
+    setState(() {
+      _selectedModel = model;
+    });
   }
 
   void _loadUserProfile() {
@@ -172,6 +192,81 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                     const SizedBox(height: 16),
+
+                    // AI Model Selection
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.1),
+                            spreadRadius: 1,
+                            blurRadius: 5,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(
+                          "AI Scoring Model",
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        subtitle: Text(
+                          _selectedModel == 'alysa'
+                              ? "Alysa (Offline / Custom Model)"
+                              : "Gemini (Online / Standard)",
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        leading: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            Icons.psychology,
+                            color: AppColors.primary,
+                            size: 24,
+                          ),
+                        ),
+                        trailing: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            _selectedModel.toUpperCase(),
+                            style: GoogleFonts.poppins(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                        onTap: () {
+                          _showModelSelectionDialog(context);
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
                     _buildMenuItem(
                       context: context,
                       icon: Icons.person_outline,
@@ -402,6 +497,126 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
             Icon(Icons.chevron_right, color: Colors.grey[400]),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showModelSelectionDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Select AI Model",
+                style: GoogleFonts.poppins(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Gemini Option
+              _buildModelOption(
+                title: "Gemini AI",
+                subtitle: "Online model by Google. High accuracy.",
+                value: "gemini",
+                isSelected: _selectedModel == 'gemini',
+                onTap: () {
+                  _saveModelPreference('gemini');
+                  Navigator.pop(context);
+                },
+              ),
+              const SizedBox(height: 12),
+
+              // Alysa Option
+              _buildModelOption(
+                title: "Alysa Model",
+                subtitle: "Custom model. Works with specific datasets.",
+                value: "alysa",
+                isSelected: _selectedModel == 'alysa',
+                onTap: () {
+                  _saveModelPreference('alysa');
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildModelOption({
+    required String title,
+    required String subtitle,
+    required String value,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primary.withOpacity(0.05)
+              : Colors.white,
+          border: Border.all(
+            color: isSelected ? AppColors.primary : Colors.grey.shade300,
+            width: isSelected ? 2 : 1,
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isSelected ? AppColors.primary : Colors.grey.shade200,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.psychology,
+                color: isSelected ? Colors.white : Colors.grey,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: isSelected ? AppColors.primary : Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (isSelected) Icon(Icons.check_circle, color: AppColors.primary),
           ],
         ),
       ),
