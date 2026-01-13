@@ -36,6 +36,7 @@ class AuthService {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $idToken',
+          'ngrok-skip-browser-warning': 'true',
         },
       );
 

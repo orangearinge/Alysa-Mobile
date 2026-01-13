@@ -36,7 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   font_awesome_flutter: ^10.6.0
   google_fonts: ^6.2.0
-  speech_to_text: ^6.6.0
+  speech_to_text: ^7.0.2
   image_picker: ^1.0.7
   permission_handler: ^11.1.0
   camera: ^0.10.5
