@@ -7,6 +7,7 @@ import 'package:alysa_speak/models/user_model.dart';
 import 'package:alysa_speak/pages/edit_profile_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:alysa_speak/pages/test_history_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -31,7 +32,6 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _loadModelPreference() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      // Default to 'gemini' (false). If saved is 'alysa', set true.
       String? savedModel = prefs.getString('selected_ai_model');
       _selectedModel = savedModel ?? 'gemini';
     });
@@ -265,7 +265,6 @@ class _ProfilePageState extends State<ProfilePage> {
                       title: "Edit Profile",
                       subtitle: "Update your target score and study plan",
                       onTap: () async {
-                        // Navigate to edit profile
                         final result = await Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -275,12 +274,27 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         );
 
-                        // If returned true, refresh data
                         if (result == true) {
                           _loadUserProfile();
                         }
                       },
                     ),
+
+                    _buildMenuItem(
+                      context: context,
+                      icon: Icons.history,
+                      title: "History Simulation Test",
+                      subtitle: "View your past results and feedback",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const TestHistoryPage(),
+                          ),
+                        );
+                      },
+                    ),
+
                     const SizedBox(height: 24),
 
                     // Logout Button
@@ -517,7 +531,6 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: 16),
 
-              // Gemini Option
               _buildModelOption(
                 title: "Gemini AI",
                 subtitle: "Online model by Google. High accuracy.",
@@ -530,7 +543,6 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: 12),
 
-              // Alysa Option
               _buildModelOption(
                 title: "Alysa Model",
                 subtitle: "Custom model. Works with specific datasets.",

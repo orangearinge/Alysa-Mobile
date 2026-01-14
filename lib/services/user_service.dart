@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:alysa_speak/models/user_model.dart';
+import 'package:alysa_speak/models/test_history_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:alysa_speak/config/api_constants.dart';
@@ -63,6 +64,34 @@ class UserService {
     } catch (e) {
       print('Error updating user profile: $e');
       return false;
+    }
+  }
+
+  Future<List<TestSessionModel>> getTestHistory() async {
+    try {
+      final token = await _getToken();
+      if (token == null) return [];
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/user/test-sessions'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        final List<dynamic> sessionsJson = data['test_sessions'] ?? [];
+        return sessionsJson
+            .map((json) => TestSessionModel.fromJson(json))
+            .toList();
+      } else {
+        throw Exception('Failed to load test history');
+      }
+    } catch (e) {
+      print('Error fetching test history: $e');
+      return [];
     }
   }
 }
