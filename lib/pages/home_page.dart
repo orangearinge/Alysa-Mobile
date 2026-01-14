@@ -7,8 +7,9 @@ import 'package:alysa_speak/pages/profile_page.dart';
 import 'package:alysa_speak/pages/scan_page.dart';
 import 'package:alysa_speak/pages/start_test.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:alysa_speak/pages/quiz_page.dart';
 import 'package:alysa_speak/services/auth_service.dart';
+import 'package:alysa_speak/services/user_service.dart';
+import 'package:alysa_speak/models/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class HomePage extends StatefulWidget {
@@ -43,15 +44,13 @@ class _HomePageState extends State<HomePage> {
           _pages[_selectedIndex],
           // Chatbot Button - positioned above navbar, bottom right
           Positioned(
-            bottom: 20, 
+            bottom: 20,
             right: 16,
             child: GestureDetector(
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const ChatbotPage(),
-                  ),
+                  MaterialPageRoute(builder: (context) => const ChatbotPage()),
                 );
               },
               child: Container(
@@ -177,7 +176,21 @@ class _HomePageState extends State<HomePage> {
 }
 
 // Home Content Widget
-class _HomeContent extends StatelessWidget {
+class _HomeContent extends StatefulWidget {
+  @override
+  State<_HomeContent> createState() => _HomeContentState();
+}
+
+class _HomeContentState extends State<_HomeContent> {
+  final UserService _userService = UserService();
+  Future<UserProfile?>? _userProfileFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _userProfileFuture = _userService.getUserProfile();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -194,20 +207,29 @@ class _HomeContent extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      StreamBuilder<User?>(
-                        stream: AuthService().authStateChanges,
-                        builder: (context, snapshot) {
-                          final user = snapshot.data;
-                          final displayName = user?.displayName ?? "User";
-                          final firstName = displayName.split(' ')[0];
-                          
-                          return Text(
-                            "Hello, $firstName!", 
-                            style: GoogleFonts.poppins(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
+                      FutureBuilder<UserProfile?>(
+                        future: _userProfileFuture,
+                        builder: (context, profileSnapshot) {
+                          return StreamBuilder<User?>(
+                            stream: AuthService().authStateChanges,
+                            builder: (context, authSnapshot) {
+                              final user = authSnapshot.data;
+                              final profile = profileSnapshot.data;
+                              final displayName =
+                                  profile?.username ??
+                                  user?.displayName ??
+                                  "User";
+                              final firstName = displayName.split(' ')[0];
+
+                              return Text(
+                                "Hello, $firstName!",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
+                              );
+                            },
                           );
                         },
                       ),

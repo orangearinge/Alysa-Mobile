@@ -48,27 +48,32 @@ class _OnboardingPageState extends State<OnboardingPage> {
       _isLoading = true;
     });
 
-    final success = await _userService.updateUserProfile(
-      targetScore: _targetScore,
-      dailyStudyTimeMinutes: _dailyStudyTime,
-      testDate: _testDate!,
-    );
+    try {
+      await _userService.updateUserProfile(
+        username: null,
+        email: null,
+        targetScore: _targetScore,
+        dailyStudyTimeMinutes: _dailyStudyTime,
+        testDate: _testDate!,
+      );
 
-    setState(() {
-      _isLoading = false;
-    });
-
-    if (success) {
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/home');
       }
-    } else {
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to save profile. Please try again.'),
+          SnackBar(
+            content: Text(e.toString().replaceAll('Exception: ', '')),
+            backgroundColor: Colors.red,
           ),
         );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }

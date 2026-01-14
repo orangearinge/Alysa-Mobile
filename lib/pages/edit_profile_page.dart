@@ -16,6 +16,8 @@ class EditProfilePage extends StatefulWidget {
 class _EditProfilePageState extends State<EditProfilePage> {
   final UserService _userService = UserService();
 
+  late TextEditingController _usernameController;
+  late TextEditingController _emailController;
   late double _targetScore;
   late int _dailyStudyTime;
   DateTime? _testDate;
@@ -37,9 +39,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   void initState() {
     super.initState();
+    _usernameController = TextEditingController(
+      text: widget.userProfile?.username,
+    );
+    _emailController = TextEditingController(text: widget.userProfile?.email);
     _targetScore = widget.userProfile?.targetScore ?? 6.5;
     _dailyStudyTime = widget.userProfile?.dailyStudyTimeMinutes ?? 30;
     _testDate = widget.userProfile?.testDate;
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _emailController.dispose();
+    super.dispose();
   }
 
   Future<void> _submit() async {
@@ -47,27 +60,32 @@ class _EditProfilePageState extends State<EditProfilePage> {
       _isLoading = true;
     });
 
-    final success = await _userService.updateUserProfile(
-      targetScore: _targetScore,
-      dailyStudyTimeMinutes: _dailyStudyTime,
-      testDate: _testDate ?? DateTime.now().add(const Duration(days: 30)),
-    );
+    try {
+      await _userService.updateUserProfile(
+        username: _usernameController.text,
+        email: _emailController.text,
+        targetScore: _targetScore,
+        dailyStudyTimeMinutes: _dailyStudyTime,
+        testDate: _testDate ?? DateTime.now().add(const Duration(days: 30)),
+      );
 
-    setState(() {
-      _isLoading = false;
-    });
-
-    if (success) {
       if (mounted) {
         Navigator.pop(context, true); // Return true to indicate success
       }
-    } else {
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to update profile. Please try again.'),
+          SnackBar(
+            content: Text(e.toString().replaceAll('Exception: ', '')),
+            backgroundColor: Colors.red,
           ),
         );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
@@ -118,6 +136,54 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       ),
                     ),
                     const SizedBox(height: 32),
+
+                    // Username
+                    Text(
+                      "Username",
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _usernameController,
+                      decoration: InputDecoration(
+                        hintText: "Enter username",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Email
+                    Text(
+                      "Email Address",
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _emailController,
+                      decoration: InputDecoration(
+                        hintText: "Enter email",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
 
                     // Target Score
                     Text(

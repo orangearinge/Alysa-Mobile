@@ -8,7 +8,6 @@ import '../services/ocr_service.dart';
 import 'ocr_result_page.dart';
 import 'ocr_history_page.dart';
 
-
 class ScanPage extends StatefulWidget {
   const ScanPage({super.key});
 
@@ -27,7 +26,6 @@ class _ScanPageState extends State<ScanPage> {
   bool showCamera = false;
   bool _isProcessing = false;
   Map<String, dynamic>? _ocrResult;
-
 
   @override
   void dispose() {
@@ -97,10 +95,7 @@ class _ScanPageState extends State<ScanPage> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.grey.shade300),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: content,
-      ),
+      child: ClipRRect(borderRadius: BorderRadius.circular(16), child: content),
     );
   }
 
@@ -165,9 +160,13 @@ class _ScanPageState extends State<ScanPage> {
     );
   }
 
-  Widget _button(String text, IconData icon, VoidCallback onPressed,
-
-      {Color? color, Color? textColor}) {
+  Widget _button(
+    String text,
+    IconData icon,
+    VoidCallback onPressed, {
+    Color? color,
+    Color? textColor,
+  }) {
     return SizedBox(
       width: double.infinity,
       height: 48,
@@ -202,9 +201,7 @@ class _ScanPageState extends State<ScanPage> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const OcrHistoryPage(),
-                ),
+                MaterialPageRoute(builder: (context) => const OcrHistoryPage()),
               );
             },
             tooltip: 'OCR History',
@@ -212,58 +209,60 @@ class _ScanPageState extends State<ScanPage> {
         ],
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              _imagePreview(),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                _imagePreview(),
 
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              _button("Upload Gambar", Icons.upload, pickImage),
+                _button("Upload Gambar", Icons.upload, pickImage),
 
-              const SizedBox(height: 10),
+                const SizedBox(height: 10),
 
-              _button(
-                "Buka Kamera",
-                Icons.camera_alt,
-                () async {
-                  showCamera = true;
-                  await initCamera();
-                  setState(() {});
-                },
-                color: Colors.white,
-                textColor: Colors.blue,
-              ),
+                _button(
+                  "Buka Kamera",
+                  Icons.camera_alt,
+                  () async {
+                    showCamera = true;
+                    await initCamera();
+                    setState(() {});
+                  },
+                  color: Colors.white,
+                  textColor: Colors.blue,
+                ),
 
-              const SizedBox(height: 10),
+                const SizedBox(height: 10),
 
-              // Process Image Button
-              if (_selectedFile != null || _webImage != null)
-                _isProcessing
-                    ? const SizedBox(
-                        height: 48,
-                        child: Center(
-                          child: CircularProgressIndicator(),
+                // Process Image Button
+                if (_selectedFile != null || _webImage != null)
+                  _isProcessing
+                      ? const SizedBox(
+                          height: 48,
+                          child: Center(child: CircularProgressIndicator()),
+                        )
+                      : _button(
+                          "Proses Gambar (OCR)",
+                          Icons.translate,
+                          processImage,
+                          color: Colors.green,
+                          textColor: Colors.white,
                         ),
-                      )
-                    : _button(
-                        "Proses Gambar (OCR)",
-                        Icons.translate,
-                        processImage,
-                        color: Colors.green,
-                        textColor: Colors.white,
-                      ),
 
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-
-              // Camera Preview
-              if (showCamera && cameraReady)
-                Expanded(
-                  child: Column(
+                // Camera Preview
+                if (showCamera && cameraReady)
+                  Column(
                     children: [
-                      Expanded(
+                      Container(
+                        height: 300,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(16),
                           child: CameraPreview(controller!),
@@ -273,8 +272,7 @@ class _ScanPageState extends State<ScanPage> {
                       const SizedBox(height: 12),
 
                       _button("Ambil Foto", Icons.camera, () async {
-                        final XFile picture =
-                            await controller!.takePicture();
+                        final XFile picture = await controller!.takePicture();
 
                         if (kIsWeb) {
                           _webImage = picture;
@@ -287,8 +285,8 @@ class _ScanPageState extends State<ScanPage> {
                       }),
                     ],
                   ),
-                )
-            ],
+              ],
+            ),
           ),
         ),
       ),
