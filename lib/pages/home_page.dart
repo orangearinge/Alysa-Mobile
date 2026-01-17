@@ -31,13 +31,19 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _onFabTapped() {
-    _onItemTapped(1);
-    print("Scan Tapped!");
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ScanPage()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> _pages = [_HomeContent(), ScanPage(), ProfilePage()];
+    final List<Widget> _pages = [
+      _HomeContent(),
+      const SizedBox(), // Placeholder for Scan tab space
+      ProfilePage(),
+    ];
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -196,148 +202,281 @@ class _HomeContentState extends State<_HomeContent> {
     _refreshData();
   }
 
-  void _refreshData() {
+  Future<void> _refreshData() async {
     setState(() {
       _userProfileFuture = _userService.getUserProfile();
       _lessonsFuture = _learningService.getLessons();
     });
+    // Wait for both futures to complete to stop the refresh indicator
+    await Future.wait([
+      _userProfileFuture ?? Future.value(null),
+      _lessonsFuture ?? Future.value(<Lesson>[]),
+    ]);
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            24.0,
-            24.0,
-            24.0,
-            100.0,
-          ), // Reduced bottom padding
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      FutureBuilder<UserProfile?>(
-                        future: _userProfileFuture,
-                        builder: (context, profileSnapshot) {
-                          return StreamBuilder<User?>(
-                            stream: AuthService().authStateChanges,
-                            builder: (context, authSnapshot) {
-                              final user = authSnapshot.data;
-                              final profile = profileSnapshot.data;
-                              final displayName =
-                                  profile?.username ??
-                                  user?.displayName ??
-                                  "User";
-                              final firstName = displayName.split(' ')[0];
+      child: RefreshIndicator(
+        onRefresh: _refreshData,
+        color: AppColors.primary,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 100.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        FutureBuilder<UserProfile?>(
+                          future: _userProfileFuture,
+                          builder: (context, profileSnapshot) {
+                            return StreamBuilder<User?>(
+                              stream: AuthService().authStateChanges,
+                              builder: (context, authSnapshot) {
+                                final user = authSnapshot.data;
+                                final profile = profileSnapshot.data;
+                                final displayName =
+                                    profile?.username ??
+                                    user?.displayName ??
+                                    "User";
+                                final firstName = displayName.split(' ')[0];
 
-                              return Text(
-                                "Hello, $firstName!",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      ),
-                      Text(
-                        "Let's crack IELTS!",
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: Colors.grey[600],
+                                return Text(
+                                  "Hello, $firstName!",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                );
+                              },
+                            );
+                          },
                         ),
+                        Text(
+                          "Let's crack IELTS!",
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 32),
+
+                // Today's Plan Section
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Today's Plan",
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        final result = await Navigator.pushNamed(
+                          context,
+                          '/planning',
+                        );
+                        if (result == true) _refreshData();
+                      },
+                      child: Text(
+                        "View All",
+                        style: GoogleFonts.poppins(color: AppColors.primary),
+                      ),
+                    ),
+                  ],
+                ),
+                FutureBuilder(
+                  future: Future.wait([
+                    _userProfileFuture ?? Future.value(null),
+                    _lessonsFuture ?? Future.value(<Lesson>[]),
+                  ]),
+                  builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: LinearProgressIndicator());
+                    }
+
+                    final profile = snapshot.data?[0] as UserProfile?;
+                    final lessons = snapshot.data?[1] as List<Lesson>? ?? [];
+
+                    final int dailyGoalMin =
+                        profile?.dailyStudyTimeMinutes ?? 30;
+                    final int completedLessons = lessons
+                        .where((l) => l.isCompleted)
+                        .length;
+                    final int totalLessons = lessons.length;
+
+                    // For now, let's estimate progress based on lessons completed vs total
+                    // since we don't track exact "minutes" per day yet.
+                    // Or we can use a fixed base for the demonstration if totalLessons is 0.
+                    final double progressValue = totalLessons > 0
+                        ? completedLessons / totalLessons
+                        : 0.0;
+
+                    return InkWell(
+                      onTap: () async {
+                        final result = await Navigator.pushNamed(
+                          context,
+                          '/planning',
+                        );
+                        if (result == true) _refreshData();
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: AppColors.secondary.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: AppColors.primary.withOpacity(0.2),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            CircularProgressIndicator(
+                              value: progressValue,
+                              backgroundColor: Colors.white,
+                              color: AppColors.primary,
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Daily Goal: $dailyGoalMin mins",
+                                    style: GoogleFonts.poppins(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  Text(
+                                    "$completedLessons of $totalLessons materials completed",
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.grey[700],
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Icon(
+                              Icons.arrow_forward_ios,
+                              size: 16,
+                              color: Colors.grey,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 32),
+
+                // Lessons Section
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Lessons",
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () =>
+                          Navigator.pushNamed(context, '/learning'),
+                      child: Text(
+                        "See All",
+                        style: GoogleFonts.poppins(color: AppColors.primary),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 120,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: [
+                      _buildLessonCard(
+                        context,
+                        "Speaking",
+                        Icons.mic,
+                        Colors.orange,
+                      ),
+                      _buildLessonCard(
+                        context,
+                        "Writing",
+                        Icons.edit,
+                        Colors.blue,
+                      ),
+                      _buildLessonCard(
+                        context,
+                        "Reading",
+                        Icons.book,
+                        Colors.green,
+                      ),
+                      _buildLessonCard(
+                        context,
+                        "Listening",
+                        Icons.headphones,
+                        Colors.purple,
                       ),
                     ],
                   ),
-                ],
-              ),
-              const SizedBox(height: 32),
+                ),
+                const SizedBox(height: 32),
 
-              // Today's Plan Section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Today's Plan",
-                    style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                // Start Test Section
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.primary,
+                        AppColors.primary.withOpacity(0.8),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                  ),
-                  TextButton(
-                    onPressed: () async {
-                      final result = await Navigator.pushNamed(
-                        context,
-                        '/planning',
-                      );
-                      if (result == true) _refreshData();
-                    },
-                    child: Text(
-                      "View All",
-                      style: GoogleFonts.poppins(color: AppColors.primary),
-                    ),
-                  ),
-                ],
-              ),
-              FutureBuilder(
-                future: Future.wait([
-                  _userProfileFuture ?? Future.value(null),
-                  _lessonsFuture ?? Future.value(<Lesson>[]),
-                ]),
-                builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: LinearProgressIndicator());
-                  }
-
-                  final profile = snapshot.data?[0] as UserProfile?;
-                  final lessons = snapshot.data?[1] as List<Lesson>? ?? [];
-
-                  final int dailyGoalMin = profile?.dailyStudyTimeMinutes ?? 30;
-                  final int completedLessons = lessons
-                      .where((l) => l.isCompleted)
-                      .length;
-                  final int totalLessons = lessons.length;
-
-                  // For now, let's estimate progress based on lessons completed vs total
-                  // since we don't track exact "minutes" per day yet.
-                  // Or we can use a fixed base for the demonstration if totalLessons is 0.
-                  final double progressValue = totalLessons > 0
-                      ? completedLessons / totalLessons
-                      : 0.0;
-
-                  return InkWell(
-                    onTap: () async {
-                      final result = await Navigator.pushNamed(
-                        context,
-                        '/planning',
-                      );
-                      if (result == true) _refreshData();
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.secondary.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: AppColors.primary.withOpacity(0.2),
-                        ),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.3),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
                       ),
-                      child: Row(
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
                         children: [
-                          CircularProgressIndicator(
-                            value: progressValue,
-                            backgroundColor: Colors.white,
-                            color: AppColors.primary,
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.psychology,
+                              color: Colors.white,
+                              size: 32,
+                            ),
                           ),
                           const SizedBox(width: 16),
                           Expanded(
@@ -345,187 +484,61 @@ class _HomeContentState extends State<_HomeContent> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "Daily Goal: $dailyGoalMin mins",
+                                  "Ready to Test?",
                                   style: GoogleFonts.poppins(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 Text(
-                                  "$completedLessons of $totalLessons materials completed",
+                                  "Challenge yourself now!",
                                   style: GoogleFonts.poppins(
-                                    color: Colors.grey[700],
-                                    fontSize: 13,
+                                    color: Colors.white.withOpacity(0.9),
+                                    fontSize: 14,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          const Icon(
-                            Icons.arrow_forward_ios,
-                            size: 16,
-                            color: Colors.grey,
-                          ),
                         ],
                       ),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 32),
-
-              // Lessons Section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Lessons",
-                    style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pushNamed(context, '/learning'),
-                    child: Text(
-                      "See All",
-                      style: GoogleFonts.poppins(color: AppColors.primary),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(
-                height: 120,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    _buildLessonCard(
-                      context,
-                      "Speaking",
-                      Icons.mic,
-                      Colors.orange,
-                    ),
-                    _buildLessonCard(
-                      context,
-                      "Writing",
-                      Icons.edit,
-                      Colors.blue,
-                    ),
-                    _buildLessonCard(
-                      context,
-                      "Reading",
-                      Icons.book,
-                      Colors.green,
-                    ),
-                    _buildLessonCard(
-                      context,
-                      "Listening",
-                      Icons.headphones,
-                      Colors.purple,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // Start Test Section
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.primary,
-                      AppColors.primary.withOpacity(0.8),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withOpacity(0.3),
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(
-                            Icons.psychology,
-                            color: Colors.white,
-                            size: 32,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Ready to Test?",
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const StartTest(),
                               ),
-                              Text(
-                                "Challenge yourself now!",
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white.withOpacity(0.9),
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const StartTest(),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: AppColors.primary,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: AppColors.primary,
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
                           ),
-                        ),
-                        child: Text(
-                          "Start Test",
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                          child: Text(
+                            "Start Test",
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 32),
-            ],
+                const SizedBox(height: 32),
+              ],
+            ),
           ),
         ),
       ),

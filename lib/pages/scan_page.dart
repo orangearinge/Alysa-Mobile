@@ -23,9 +23,13 @@ class _ScanPageState extends State<ScanPage> {
   final ImagePicker picker = ImagePicker();
   final OcrService _ocrService = OcrService();
 
-  bool showCamera = false;
   bool _isProcessing = false;
-  Map<String, dynamic>? _ocrResult;
+
+  @override
+  void initState() {
+    super.initState();
+    initCamera();
+  }
 
   @override
   void dispose() {
@@ -34,85 +38,47 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   Future<void> initCamera() async {
-    if (kIsWeb) {
+    try {
+      if (!kIsWeb) {
+        var status = await Permission.camera.request();
+        if (!status.isGranted) return;
+      }
+
       cameras = await availableCameras();
+      if (cameras.isEmpty) return;
 
       controller = CameraController(
         cameras.first,
-        ResolutionPreset.medium,
+        ResolutionPreset.high,
         enableAudio: false,
       );
 
       await controller!.initialize();
-      setState(() {});
-      return;
+      if (mounted) setState(() {});
+    } catch (e) {
+      debugPrint("Camera init error: $e");
     }
-
-    var status = await Permission.camera.request();
-    if (!status.isGranted) return;
-
-    cameras = await availableCameras();
-
-    controller = CameraController(
-      cameras.first,
-      ResolutionPreset.medium,
-      enableAudio: false,
-    );
-
-    await controller!.initialize();
-    setState(() {});
   }
 
   Future<void> pickImage() async {
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
-      if (kIsWeb) {
-        _webImage = image;
-      } else {
-        _selectedFile = File(image.path);
-      }
-      setState(() {});
+      setState(() {
+        if (kIsWeb) {
+          _webImage = image;
+        } else {
+          _selectedFile = File(image.path);
+        }
+      });
     }
-  }
-
-  Widget _imagePreview() {
-    Widget content;
-
-    if (kIsWeb && _webImage != null) {
-      content = Image.network(_webImage!.path, fit: BoxFit.cover);
-    } else if (!kIsWeb && _selectedFile != null) {
-      content = Image.file(_selectedFile!, fit: BoxFit.cover);
-    } else {
-      content = const Icon(Icons.image, size: 80, color: Colors.grey);
-    }
-
-    return Container(
-      height: 220,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: ClipRRect(borderRadius: BorderRadius.circular(16), child: content),
-    );
   }
 
   Future<void> processImage() async {
-    if (_selectedFile == null && _webImage == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Silakan pilih atau ambil gambar terlebih dahulu'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
+    if (_selectedFile == null && _webImage == null) return;
 
     setState(() {
       _isProcessing = true;
-      _ocrResult = null;
     });
 
     try {
@@ -122,174 +88,266 @@ class _ScanPageState extends State<ScanPage> {
       );
 
       setState(() {
-        _ocrResult = result;
         _isProcessing = false;
       });
 
-      // Show result dialog
       if (mounted) {
-        _showResultDialog(result);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => OcrResultPage(
+              ocrResult: result,
+              imageFile: _selectedFile,
+              webImage: _webImage,
+            ),
+          ),
+        );
       }
     } catch (e) {
       setState(() {
         _isProcessing = false;
       });
-
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 4),
-          ),
+          SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
         );
       }
     }
   }
 
-  void _showResultDialog(Map<String, dynamic> result) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => OcrResultPage(
-          ocrResult: result,
-          imageFile: _selectedFile,
-          webImage: _webImage,
-        ),
-      ),
-    );
-  }
-
-  Widget _button(
-    String text,
-    IconData icon,
-    VoidCallback onPressed, {
-    Color? color,
-    Color? textColor,
-  }) {
-    return SizedBox(
-      width: double.infinity,
-      height: 48,
-      child: ElevatedButton.icon(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color ?? Colors.blue,
-          foregroundColor: textColor ?? Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-        ),
-        icon: Icon(icon),
-        label: Text(text),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    if (_isProcessing) {
+      return const Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(color: Colors.white),
+              SizedBox(height: 20),
+              Text(
+                "Memproses Gambar...",
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     final bool cameraReady =
         (controller != null && controller!.value.isInitialized);
+    final bool hasImage = (_selectedFile != null || _webImage != null);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Scan / Upload Image"),
-        centerTitle: true,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.history),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const OcrHistoryPage()),
-              );
-            },
-            tooltip: 'OCR History',
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          // 1. Background Content (Camera or Image)
+          if (!hasImage && cameraReady)
+            Positioned.fill(child: CameraPreview(controller!))
+          else if (hasImage)
+            Positioned.fill(child: _previewSelectedImage())
+          else
+            const Center(child: CircularProgressIndicator(color: Colors.white)),
+
+          // 2. Overlay Top UI
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 10,
+            left: 20,
+            right: 20,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _circleIconButton(
+                  icon: Icons.arrow_back,
+                  onPressed: () => Navigator.pop(context),
+                ),
+                if (hasImage)
+                  _circleIconButton(
+                    icon: Icons.close,
+                    onPressed: () => setState(() {
+                      _selectedFile = null;
+                      _webImage = null;
+                    }),
+                  )
+                else
+                  const SizedBox(width: 48),
+                _circleIconButton(
+                  icon: Icons.history,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const OcrHistoryPage(),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
+
+          // 3. Overlay Bottom Controls
+          Positioned(
+            bottom: 40,
+            left: 0,
+            right: 0,
             child: Column(
               children: [
-                _imagePreview(),
-
-                const SizedBox(height: 16),
-
-                _button("Upload Gambar", Icons.upload, pickImage),
-
-                const SizedBox(height: 10),
-
-                _button(
-                  "Buka Kamera",
-                  Icons.camera_alt,
-                  () async {
-                    showCamera = true;
-                    await initCamera();
-                    setState(() {});
-                  },
-                  color: Colors.white,
-                  textColor: Colors.blue,
-                ),
-
-                const SizedBox(height: 10),
-
-                // Process Image Button
-                if (_selectedFile != null || _webImage != null)
-                  _isProcessing
-                      ? const SizedBox(
-                          height: 48,
-                          child: Center(child: CircularProgressIndicator()),
-                        )
-                      : _button(
-                          "Proses Gambar (OCR)",
-                          Icons.translate,
-                          processImage,
-                          color: Colors.green,
-                          textColor: Colors.white,
+                if (hasImage)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: ElevatedButton.icon(
+                        onPressed: processImage,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
                         ),
-
-                const SizedBox(height: 20),
-
-                // Camera Preview
-                if (showCamera && cameraReady)
-                  Column(
-                    children: [
-                      Container(
-                        height: 300,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: CameraPreview(controller!),
+                        icon: const Icon(Icons.translate),
+                        label: const Text(
+                          "PROSES GAMBAR",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
-
-                      const SizedBox(height: 12),
-
-                      _button("Ambil Foto", Icons.camera, () async {
-                        final XFile picture = await controller!.takePicture();
-
-                        if (kIsWeb) {
-                          _webImage = picture;
-                        } else {
-                          _selectedFile = File(picture.path);
-                        }
-
-                        showCamera = false;
-                        setState(() {});
-                      }),
+                    ),
+                  )
+                else
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      // Gallery Option
+                      _actionButton(
+                        icon: Icons.photo_library,
+                        label: "Galeri",
+                        onPressed: pickImage,
+                      ),
+                      // Capture Button
+                      GestureDetector(
+                        onTap: () async {
+                          if (!cameraReady) return;
+                          try {
+                            final XFile picture = await controller!
+                                .takePicture();
+                            setState(() {
+                              if (kIsWeb) {
+                                _webImage = picture;
+                              } else {
+                                _selectedFile = File(picture.path);
+                              }
+                            });
+                          } catch (e) {
+                            debugPrint("Capture error: $e");
+                          }
+                        },
+                        child: Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 4),
+                          ),
+                          child: Center(
+                            child: Container(
+                              width: 64,
+                              height: 64,
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Switch Camera
+                      _actionButton(
+                        icon: Icons.flip_camera_ios,
+                        label: "Balik",
+                        onPressed: _toggleCamera,
+                      ),
                     ],
                   ),
               ],
             ),
           ),
-        ),
+        ],
       ),
+    );
+  }
+
+  Future<void> _toggleCamera() async {
+    if (cameras.length < 2) return;
+    final lensDirection = controller!.description.lensDirection;
+    CameraDescription newDescription = cameras.firstWhere(
+      (c) => lensDirection == CameraLensDirection.back
+          ? c.lensDirection == CameraLensDirection.front
+          : c.lensDirection == CameraLensDirection.back,
+      orElse: () => cameras.first,
+    );
+    await controller!.dispose();
+    controller = CameraController(
+      newDescription,
+      ResolutionPreset.high,
+      enableAudio: false,
+    );
+    await controller!.initialize();
+    if (mounted) setState(() {});
+  }
+
+  Widget _previewSelectedImage() {
+    if (kIsWeb && _webImage != null) {
+      return Image.network(_webImage!.path, fit: BoxFit.contain);
+    } else if (!kIsWeb && _selectedFile != null) {
+      return Image.file(_selectedFile!, fit: BoxFit.contain);
+    }
+    return const Center(
+      child: Icon(Icons.image, size: 80, color: Colors.white),
+    );
+  }
+
+  Widget _circleIconButton({
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) {
+    return CircleAvatar(
+      backgroundColor: Colors.black45,
+      radius: 24,
+      child: IconButton(
+        icon: Icon(icon, color: Colors.white, size: 24),
+        onPressed: onPressed,
+      ),
+    );
+  }
+
+  Widget _actionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _circleIconButton(icon: icon, onPressed: onPressed),
+        const SizedBox(height: 8),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
     );
   }
 }
