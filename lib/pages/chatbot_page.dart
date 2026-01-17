@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:alysa_speak/theme/app_color.dart';
+import 'package:alysa_speak/services/chatbot_service.dart';
 
 class ChatbotPage extends StatefulWidget {
   const ChatbotPage({super.key});
@@ -13,6 +14,8 @@ class _ChatbotPageState extends State<ChatbotPage> {
   final TextEditingController _messageController = TextEditingController();
   final List<ChatMessage> _messages = [];
   final ScrollController _scrollController = ScrollController();
+  final ChatbotService _chatbotService = ChatbotService();
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -20,46 +23,60 @@ class _ChatbotPageState extends State<ChatbotPage> {
     // Welcome message
     _messages.add(
       ChatMessage(
-        text: "Hello! I'm Alysa, your IELTS learning assistant. How can I help you today?",
+        text:
+            "Hello! I'm Alysa, your IELTS learning assistant. How can I help you today?",
         isUser: false,
         timestamp: DateTime.now(),
       ),
     );
   }
 
-  void _sendMessage() {
+  Future<void> _sendMessage() async {
     if (_messageController.text.trim().isEmpty) return;
 
     final userMessage = _messageController.text;
-    
+
     setState(() {
       _messages.add(
-        ChatMessage(
-          text: userMessage,
-          isUser: true,
-          timestamp: DateTime.now(),
-        ),
+        ChatMessage(text: userMessage, isUser: true, timestamp: DateTime.now()),
       );
       _messageController.clear();
+      _isLoading = true;
     });
 
-    // Simulate bot response
-    Future.delayed(const Duration(milliseconds: 800), () {
+    _scrollToBottom();
+
+    try {
+      final botResponse = await _chatbotService.sendMessage(userMessage);
       if (mounted) {
         setState(() {
           _messages.add(
             ChatMessage(
-              text: _generateBotResponse(userMessage),
+              text: botResponse,
               isUser: false,
               timestamp: DateTime.now(),
             ),
           );
+          _isLoading = false;
         });
         _scrollToBottom();
       }
-    });
-
-    _scrollToBottom();
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _messages.add(
+            ChatMessage(
+              text:
+                  "Sorry, I had trouble connecting to the service. Please try again.",
+              isUser: false,
+              timestamp: DateTime.now(),
+            ),
+          );
+          _isLoading = false;
+        });
+        _scrollToBottom();
+      }
+    }
   }
 
   void _scrollToBottom() {
@@ -72,26 +89,6 @@ class _ChatbotPageState extends State<ChatbotPage> {
         );
       }
     });
-  }
-
-  String _generateBotResponse(String userMessage) {
-    final lowerMessage = userMessage.toLowerCase();
-    
-    if (lowerMessage.contains('speaking')) {
-      return "Great! For speaking, focus on fluency and pronunciation. Would you like tips on specific skills like stress, intonation, or grammar in speech?";
-    } else if (lowerMessage.contains('writing')) {
-      return "Writing is important! You need to work on task achievement, coherence, and vocabulary. Which writing task (Task 1 or Task 2) would you like to practice?";
-    } else if (lowerMessage.contains('listening')) {
-      return "Listening practice is essential! Try listening to podcasts or TED talks. What type of listening material interests you?";
-    } else if (lowerMessage.contains('reading')) {
-      return "Reading practice helps with vocabulary and comprehension. Would you like tips on skimming, scanning, or understanding difficult words?";
-    } else if (lowerMessage.contains('score') || lowerMessage.contains('test')) {
-      return "To improve your IELTS score, focus on consistent practice. Which band score are you aiming for?";
-    } else if (lowerMessage.contains('help') || lowerMessage.contains('?')) {
-      return "I'm here to help! You can ask me about Speaking, Writing, Reading, Listening, or general IELTS tips. What would you like to know?";
-    } else {
-      return "That's a great question! I'd recommend practicing regularly and focusing on your weakest skills. Is there a specific area you'd like to work on?";
-    }
   }
 
   @override
@@ -133,8 +130,11 @@ class _ChatbotPageState extends State<ChatbotPage> {
                 : ListView.builder(
                     controller: _scrollController,
                     padding: const EdgeInsets.all(16),
-                    itemCount: _messages.length,
+                    itemCount: _messages.length + (_isLoading ? 1 : 0),
                     itemBuilder: (context, index) {
+                      if (index == _messages.length && _isLoading) {
+                        return _buildLoadingBubble();
+                      }
                       final message = _messages[index];
                       return _buildChatBubble(message);
                     },
@@ -190,20 +190,16 @@ class _ChatbotPageState extends State<ChatbotPage> {
                   ),
                   const SizedBox(width: 12),
                   GestureDetector(
-                    onTap: _sendMessage,
+                    onTap: _isLoading ? null : _sendMessage,
                     child: Container(
                       width: 45,
                       height: 45,
                       decoration: BoxDecoration(
-                        color: AppColors.primary,
+                        color: _isLoading ? Colors.grey : AppColors.primary,
                         shape: BoxShape.circle,
                       ),
                       child: Center(
-                        child: Icon(
-                          Icons.send,
-                          color: Colors.white,
-                          size: 20,
-                        ),
+                        child: Icon(Icons.send, color: Colors.white, size: 20),
                       ),
                     ),
                   ),
@@ -255,6 +251,28 @@ class _ChatbotPageState extends State<ChatbotPage> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingBubble() {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: AppColors.secondary.withOpacity(0.6),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+          ),
         ),
       ),
     );

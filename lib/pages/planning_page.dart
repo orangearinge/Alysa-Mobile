@@ -369,8 +369,8 @@ class _PlanningPageState extends State<PlanningPage> {
                               (lesson) => Padding(
                                 padding: const EdgeInsets.only(bottom: 8),
                                 child: InkWell(
-                                  onTap: () {
-                                    Navigator.push(
+                                  onTap: () async {
+                                    final result = await Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (_) => LessonDetailPage(
@@ -379,6 +379,15 @@ class _PlanningPageState extends State<PlanningPage> {
                                         ),
                                       ),
                                     );
+
+                                    if (result == true) {
+                                      setState(() {
+                                        _userProfileFuture = _userService
+                                            .getUserProfile();
+                                        _lessonsFuture = _learningService
+                                            .getLessons();
+                                      });
+                                    }
                                   },
                                   borderRadius: BorderRadius.circular(8),
                                   child: Container(
@@ -433,11 +442,18 @@ class _PlanningPageState extends State<PlanningPage> {
                                             ],
                                           ),
                                         ),
-                                        Icon(
-                                          Icons.arrow_forward_ios,
-                                          size: 16,
-                                          color: Colors.grey[400],
-                                        ),
+                                        if (lesson.isCompleted)
+                                          const Icon(
+                                            Icons.check_circle,
+                                            size: 20,
+                                            color: Colors.green,
+                                          )
+                                        else
+                                          Icon(
+                                            Icons.arrow_forward_ios,
+                                            size: 16,
+                                            color: Colors.grey[400],
+                                          ),
                                       ],
                                     ),
                                   ),

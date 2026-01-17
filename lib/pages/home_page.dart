@@ -10,6 +10,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:alysa_speak/services/auth_service.dart';
 import 'package:alysa_speak/services/user_service.dart';
 import 'package:alysa_speak/models/user_model.dart';
+import 'package:alysa_speak/models/learning_model.dart';
+import 'package:alysa_speak/services/learning_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class HomePage extends StatefulWidget {
@@ -183,12 +185,22 @@ class _HomeContent extends StatefulWidget {
 
 class _HomeContentState extends State<_HomeContent> {
   final UserService _userService = UserService();
+  final LearningService _learningService = LearningService();
+
   Future<UserProfile?>? _userProfileFuture;
+  Future<List<Lesson>>? _lessonsFuture;
 
   @override
   void initState() {
     super.initState();
-    _userProfileFuture = _userService.getUserProfile();
+    _refreshData();
+  }
+
+  void _refreshData() {
+    setState(() {
+      _userProfileFuture = _userService.getUserProfile();
+      _lessonsFuture = _learningService.getLessons();
+    });
   }
 
   @override
@@ -196,7 +208,12 @@ class _HomeContentState extends State<_HomeContent> {
     return SafeArea(
       child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 500.0),
+          padding: const EdgeInsets.fromLTRB(
+            24.0,
+            24.0,
+            24.0,
+            100.0,
+          ), // Reduced bottom padding
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -258,7 +275,13 @@ class _HomeContentState extends State<_HomeContent> {
                     ),
                   ),
                   TextButton(
-                    onPressed: () => Navigator.pushNamed(context, '/planning'),
+                    onPressed: () async {
+                      final result = await Navigator.pushNamed(
+                        context,
+                        '/planning',
+                      );
+                      if (result == true) _refreshData();
+                    },
                     child: Text(
                       "View All",
                       style: GoogleFonts.poppins(color: AppColors.primary),
@@ -266,54 +289,88 @@ class _HomeContentState extends State<_HomeContent> {
                   ),
                 ],
               ),
-              InkWell(
-                onTap: () => Navigator.pushNamed(context, '/planning'),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.secondary.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: AppColors.primary.withOpacity(0.2),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      CircularProgressIndicator(
-                        value: 0.4,
-                        backgroundColor: Colors.white,
-                        color: AppColors.primary,
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Daily Goal: 30 mins",
-                              style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                              ),
-                            ),
-                            Text(
-                              "12 mins completed",
-                              style: GoogleFonts.poppins(
-                                color: Colors.grey[700],
-                                fontSize: 13,
-                              ),
-                            ),
-                          ],
+              FutureBuilder(
+                future: Future.wait([
+                  _userProfileFuture ?? Future.value(null),
+                  _lessonsFuture ?? Future.value(<Lesson>[]),
+                ]),
+                builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: LinearProgressIndicator());
+                  }
+
+                  final profile = snapshot.data?[0] as UserProfile?;
+                  final lessons = snapshot.data?[1] as List<Lesson>? ?? [];
+
+                  final int dailyGoalMin = profile?.dailyStudyTimeMinutes ?? 30;
+                  final int completedLessons = lessons
+                      .where((l) => l.isCompleted)
+                      .length;
+                  final int totalLessons = lessons.length;
+
+                  // For now, let's estimate progress based on lessons completed vs total
+                  // since we don't track exact "minutes" per day yet.
+                  // Or we can use a fixed base for the demonstration if totalLessons is 0.
+                  final double progressValue = totalLessons > 0
+                      ? completedLessons / totalLessons
+                      : 0.0;
+
+                  return InkWell(
+                    onTap: () async {
+                      final result = await Navigator.pushNamed(
+                        context,
+                        '/planning',
+                      );
+                      if (result == true) _refreshData();
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: AppColors.primary.withOpacity(0.2),
                         ),
                       ),
-                      const Icon(
-                        Icons.arrow_forward_ios,
-                        size: 16,
-                        color: Colors.grey,
+                      child: Row(
+                        children: [
+                          CircularProgressIndicator(
+                            value: progressValue,
+                            backgroundColor: Colors.white,
+                            color: AppColors.primary,
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Daily Goal: $dailyGoalMin mins",
+                                  style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                Text(
+                                  "$completedLessons of $totalLessons materials completed",
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.grey[700],
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(
+                            Icons.arrow_forward_ios,
+                            size: 16,
+                            color: Colors.grey,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 32),
 

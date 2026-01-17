@@ -431,13 +431,37 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
                       child: SizedBox(
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: !isLastSection
-                              ? () => _nextSection(lesson.sections.length)
-                              : null,
+                          onPressed: () async {
+                            if (!isLastSection) {
+                              _nextSection(lesson.sections.length);
+                            } else {
+                              // Mark as completed on last section
+                              final success = await _learningService
+                                  .completeLesson(lesson.id);
+                              if (mounted) {
+                                if (success) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Lesson completed! 🎉"),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                  Navigator.pop(context, true);
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        "Failed to update progress.",
+                                      ),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              }
+                            }
+                          },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: !isLastSection
-                                ? AppColors.primary
-                                : Colors.grey.shade300,
+                            backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -447,14 +471,18 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                "Next",
+                                isLastSection ? "Finish" : "Next",
                                 style: GoogleFonts.poppins(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              const Icon(Icons.arrow_forward),
+                              Icon(
+                                isLastSection
+                                    ? Icons.check
+                                    : Icons.arrow_forward,
+                              ),
                             ],
                           ),
                         ),
