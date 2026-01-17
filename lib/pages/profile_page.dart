@@ -8,6 +8,7 @@ import 'package:alysa_speak/pages/edit_profile_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:alysa_speak/pages/test_history_page.dart';
+import 'package:alysa_speak/pages/feedback_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -298,6 +299,21 @@ class _ProfilePageState extends State<ProfilePage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => const TestHistoryPage(),
+                          ),
+                        );
+                      },
+                    ),
+
+                    _buildMenuItem(
+                      context: context,
+                      icon: Icons.rate_review_outlined,
+                      title: "Send Feedback",
+                      subtitle: "Help us improve Alysa",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const FeedbackPage(),
                           ),
                         );
                       },

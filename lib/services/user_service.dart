@@ -110,4 +110,28 @@ class UserService {
       return [];
     }
   }
+
+  Future<void> sendFeedback(String feedbackText) async {
+    try {
+      final token = await _getToken();
+      if (token == null) throw Exception('Authentication token not found');
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/feedback'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'feedback_text': feedbackText}),
+      );
+
+      if (response.statusCode != 201) {
+        final errorData = jsonDecode(response.body);
+        throw Exception(errorData['error'] ?? 'Failed to submit feedback');
+      }
+    } catch (e) {
+      print('Error sending feedback: $e');
+      rethrow;
+    }
+  }
 }
