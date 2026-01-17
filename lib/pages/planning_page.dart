@@ -103,7 +103,17 @@ class _PlanningPageState extends State<PlanningPage> {
           }
 
           if (snapshot.hasError) {
-            return Center(child: Text('Error loading plan: ${snapshot.error}'));
+            return Center(
+              child: Builder(
+                builder: (context) {
+                  debugPrint("Planning loading error: ${snapshot.error}");
+                  return const Text(
+                    "Gagal memuat rencana belajar. Silakan coba lagi nanti.",
+                    textAlign: TextAlign.center,
+                  );
+                },
+              ),
+            );
           }
 
           final UserProfile? user = snapshot.data?[0] as UserProfile?;

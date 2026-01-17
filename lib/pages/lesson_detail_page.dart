@@ -186,8 +186,14 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
               leading: const BackButton(color: Colors.black),
             ),
             body: Center(
-              child: Text(
-                "Error loading lesson: ${snapshot.error ?? 'Not found'}",
+              child: Builder(
+                builder: (context) {
+                  debugPrint("Lesson detail loading error: ${snapshot.error}");
+                  return const Text(
+                    "Gagal memuat materi detail. Silakan coba lagi nanti.",
+                    textAlign: TextAlign.center,
+                  );
+                },
               ),
             ),
           );

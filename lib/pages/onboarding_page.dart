@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:alysa_speak/theme/app_color.dart';
 import 'package:alysa_speak/services/user_service.dart';
+import 'package:alysa_speak/widgets/error_dialog.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -33,9 +34,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   final List<int> _timeOptions = [15, 30, 45, 60, 90, 120];
 
   void _presentUnknownError() {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Please select a test date')));
+    ErrorDialog.show(context, message: 'Please select a test date');
   }
 
   Future<void> _submit() async {
@@ -61,12 +60,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
         Navigator.pushReplacementNamed(context, '/home');
       }
     } catch (e) {
+      debugPrint("Onboarding update error: $e");
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString().replaceAll('Exception: ', '')),
-            backgroundColor: Colors.red,
-          ),
+        ErrorDialog.show(
+          context,
+          message: "Gagal menyimpan rencana belajar. Silakan coba lagi.",
         );
       }
     } finally {

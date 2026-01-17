@@ -5,6 +5,7 @@ import 'package:alysa_speak/models/test_model.dart';
 import 'package:alysa_speak/services/test_service.dart';
 import 'package:alysa_speak/theme/app_color.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:alysa_speak/widgets/error_dialog.dart';
 import 'hasil_test_page.dart';
 import 'test_review_page.dart';
 
@@ -65,11 +66,13 @@ class _TestMixedPageState extends State<TestMixedPage> {
       });
       _startTimer();
     } catch (e) {
+      debugPrint("Start test error: $e");
       if (mounted) {
         setState(() => isLoading = false);
-        ScaffoldMessenger.of(
+        ErrorDialog.show(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error loading test: $e')));
+          message: 'Gagal memuat tes. Silakan coba lagi nanti.',
+        );
         Navigator.pop(context);
       }
     }
@@ -160,10 +163,12 @@ class _TestMixedPageState extends State<TestMixedPage> {
         );
       }
     } catch (e) {
+      debugPrint("Finish test error: $e");
       if (mounted) {
-        ScaffoldMessenger.of(
+        ErrorDialog.show(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error submitting test: $e')));
+          message: 'Gagal mengirim jawaban. Silakan coba lagi.',
+        );
       }
     } finally {
       if (mounted) setState(() => isSubmitting = false);

@@ -3,6 +3,7 @@ import 'package:alysa_speak/theme/app_color.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:alysa_speak/services/auth_service.dart';
 import 'package:alysa_speak/services/user_service.dart';
+import 'package:alysa_speak/widgets/error_dialog.dart';
 
 class CreateAccountPage extends StatefulWidget {
   const CreateAccountPage({super.key});
@@ -29,14 +30,19 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     setState(() => errorMessage = null);
 
     if (email.isEmpty || pass.isEmpty || confirmPass.isEmpty) {
-      setState(() => errorMessage = "Please fill in all fields");
+      if (mounted) {
+        ErrorDialog.show(context, message: "Please fill in all fields");
+      }
       return;
     }
 
     if (pass != confirmPass) {
-      setState(
-        () => errorMessage = "Password and confirm password do not match",
-      );
+      if (mounted) {
+        ErrorDialog.show(
+          context,
+          message: "Password and confirm password do not match",
+        );
+      }
       return;
     }
 
@@ -52,7 +58,13 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
         );
       }
     } catch (e) {
-      setState(() => errorMessage = e.toString());
+      debugPrint("Sign up error: $e");
+      if (mounted) {
+        ErrorDialog.show(
+          context,
+          message: "Gagal membuat akun. Silakan coba lagi nanti.",
+        );
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -80,7 +92,13 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
         }
       }
     } catch (e) {
-      setState(() => errorMessage = e.toString());
+      debugPrint("Google Sign Up error: $e");
+      if (mounted) {
+        ErrorDialog.show(
+          context,
+          message: "Gagal mendaftar dengan Google. Silakan coba lagi nanti.",
+        );
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -208,12 +226,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                // Pesan error
-                if (errorMessage != null)
-                  Text(
-                    errorMessage!,
-                    style: const TextStyle(color: Colors.red, fontSize: 14),
-                  ),
 
                 const SizedBox(height: 40),
 

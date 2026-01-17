@@ -70,14 +70,19 @@ class _LearningPageState extends State<LearningPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    "Error loading lessons: ${snapshot.error}",
-                    textAlign: TextAlign.center,
+                  Builder(
+                    builder: (context) {
+                      debugPrint("Lessons loading error: ${snapshot.error}");
+                      return const Text(
+                        "Gagal memuat materi pembelajaran. Silakan coba lagi nanti.",
+                        textAlign: TextAlign.center,
+                      );
+                    },
                   ),
                   const SizedBox(height: 8),
                   ElevatedButton(
                     onPressed: () => setState(_refreshLessons),
-                    child: const Text("Retry"),
+                    child: const Text("Coba Lagi"),
                   ),
                 ],
               ),

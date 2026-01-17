@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:alysa_speak/theme/app_color.dart';
 import 'package:alysa_speak/services/user_service.dart';
 import 'package:alysa_speak/models/user_model.dart';
+import 'package:alysa_speak/widgets/error_dialog.dart';
 
 class EditProfilePage extends StatefulWidget {
   final UserProfile? userProfile;
@@ -73,12 +74,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
         Navigator.pop(context, true); // Return true to indicate success
       }
     } catch (e) {
+      debugPrint("Update profile error: $e");
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString().replaceAll('Exception: ', '')),
-            backgroundColor: Colors.red,
-          ),
+        ErrorDialog.show(
+          context,
+          message: "Gagal memperbarui profil. Silakan coba lagi nanti.",
         );
       }
     } finally {

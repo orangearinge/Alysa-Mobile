@@ -85,8 +85,14 @@ class _QuizPageState extends State<QuizPage> {
               leading: const BackButton(color: Colors.black),
             ),
             body: Center(
-              child: Text(
-                "Error loading quiz: ${snapshot.error ?? 'Not found'}",
+              child: Builder(
+                builder: (context) {
+                  debugPrint("Quiz loading error: ${snapshot.error}");
+                  return const Text(
+                    "Gagal memuat kuis. Silakan coba lagi nanti.",
+                    textAlign: TextAlign.center,
+                  );
+                },
               ),
             ),
           );

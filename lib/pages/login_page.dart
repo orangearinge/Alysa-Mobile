@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:alysa_speak/theme/app_color.dart';
 import 'package:alysa_speak/services/auth_service.dart';
+import 'package:alysa_speak/widgets/error_dialog.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -39,7 +40,14 @@ class _LoginPageState extends State<LoginPage> {
         Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
       }
     } catch (e) {
-      setState(() => errorMessage = e.toString());
+      debugPrint("Login error: $e");
+      if (mounted) {
+        ErrorDialog.show(
+          context,
+          message:
+              "Gagal masuk. Silakan periksa koneksi internet atau coba lagi nanti.",
+        );
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -53,7 +61,13 @@ class _LoginPageState extends State<LoginPage> {
         Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
       }
     } catch (e) {
-      setState(() => errorMessage = e.toString());
+      debugPrint("Google Sign-In error: $e");
+      if (mounted) {
+        ErrorDialog.show(
+          context,
+          message: "Gagal masuk dengan Google. Silakan coba lagi nanti.",
+        );
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -151,13 +165,6 @@ class _LoginPageState extends State<LoginPage> {
                 ),
 
                 const SizedBox(height: 10),
-
-                // Error message
-                if (errorMessage != null)
-                  Text(
-                    errorMessage!,
-                    style: const TextStyle(color: Colors.red, fontSize: 14),
-                  ),
 
                 const SizedBox(height: 10),
 
