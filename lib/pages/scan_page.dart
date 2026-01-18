@@ -24,6 +24,7 @@ class _ScanPageState extends State<ScanPage> {
   final OcrService _ocrService = OcrService();
 
   bool _isProcessing = false;
+  FlashMode _flashMode = FlashMode.off;
 
   @override
   void initState() {
@@ -172,6 +173,13 @@ class _ScanPageState extends State<ScanPage> {
                       _webImage = null;
                     }),
                   )
+                else if (!kIsWeb && cameraReady)
+                  _circleIconButton(
+                    icon: _flashMode == FlashMode.off
+                        ? Icons.flash_off
+                        : Icons.flash_on,
+                    onPressed: _toggleFlash,
+                  )
                 else
                   const SizedBox(width: 48),
                 _circleIconButton(
@@ -302,6 +310,22 @@ class _ScanPageState extends State<ScanPage> {
     );
     await controller!.initialize();
     if (mounted) setState(() {});
+  }
+
+  Future<void> _toggleFlash() async {
+    if (controller == null || !controller!.value.isInitialized) return;
+    if (kIsWeb) return; // Flash not supported on web
+
+    try {
+      setState(() {
+        _flashMode = _flashMode == FlashMode.off
+            ? FlashMode.torch
+            : FlashMode.off;
+      });
+      await controller!.setFlashMode(_flashMode);
+    } catch (e) {
+      debugPrint("Flash toggle error: $e");
+    }
   }
 
   Widget _previewSelectedImage() {

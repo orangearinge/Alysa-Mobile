@@ -355,7 +355,10 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
 
               // Navigation buttons at the bottom
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   boxShadow: [
