@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "118779504369-duhrsrj3rnsvnlhptbqp381cq9bumoj0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.alysa_speak",
+            "certificate_hash": "a960bd5dcaa3a2fef85aafb52eb5d5165f3762d0"
+          }
+        },
+        {
           "client_id": "118779504369-rpmhn6ah5p6j6g96598bpmoma9af50bd.apps.googleusercontent.com",
           "client_type": 3
         }
