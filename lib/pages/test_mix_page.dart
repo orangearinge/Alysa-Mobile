@@ -184,59 +184,30 @@ class _TestMixedPageState extends State<TestMixedPage> {
     }
 
     if (isRecording) {
-      // Stop recording
-      await _speech.stop();
+      _speech.stop();
       setState(() => isRecording = false);
     } else {
-      // Start recording
       setState(() {
         isRecording = true;
-        spokenText = ""; // Clear only when user starts fresh
+        spokenText = ""; // clear previous
       });
-      _startListening();
-    }
-  }
-
-  void _startListening() {
-    _speech.listen(
-      onResult: (result) {
-        if (mounted) {
+      _speech.listen(
+        onResult: (result) {
           setState(() {
-            // APPEND text, don't replace! Accumulate all sentences
-            if (result.finalResult) {
-              // Sentence finished - add to accumulated text with space
-              if (spokenText.isNotEmpty && !spokenText.endsWith(' ')) {
-                spokenText += ' ';
-              }
-              spokenText += result.recognizedWords;
-            } else {
-              // Partial result - for now just keep accumulated text
-              // User will see next final result added
-            }
+            spokenText = result.recognizedWords;
           });
-        }
-
-        // Auto-restart ketika user selesai bicara (finalResult) untuk capture kalimat berikutnya
-        if (result.finalResult && isRecording && mounted) {
-          // Delay minimal untuk seamless restart
-          Future.delayed(const Duration(milliseconds: 100), () {
-            if (isRecording && mounted && _speech.isNotListening) {
-              _startListening(); // Restart immediately for next sentence
-            }
-          });
-        }
-      },
-      listenFor: const Duration(minutes: 5), // Maximum duration per session
-      pauseFor: const Duration(
-        seconds: 2,
-      ), // Short pause tolerance for natural speech
-      partialResults: true, // Real-time feedback
-      onSoundLevelChange: (level) {
-        // Optional: bisa tambah visual feedback sound level
-      },
-      cancelOnError: false,
-      listenMode: stt.ListenMode.dictation, // Best for continuous speech
-    );
+        },
+        listenFor: const Duration(minutes: 3), // Listen for up to 3 minutes
+        pauseFor: const Duration(
+          seconds: 10,
+        ), // Allow 10 seconds of silence before stopping
+        partialResults: true, // Show partial results while speaking
+        cancelOnError: false, // Don't cancel on minor errors
+        listenMode: stt
+            .ListenMode
+            .confirmation, // Keep listening until manually stopped
+      );
+    }
   }
 
   @override
