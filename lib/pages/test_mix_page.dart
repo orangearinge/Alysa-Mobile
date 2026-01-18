@@ -146,9 +146,11 @@ class _TestMixedPageState extends State<TestMixedPage> {
 
       if (mounted) {
         // Calculate simple stats for the summary screen
-        int correctCount = result.results.where((r) => r.score >= 3.0).length;
+        int correctCount = result.results
+            .where((r) => r.score >= 4.5)
+            .length; // Updated threshold for 0-9 scale
         int wrongCount = result.results.length - correctCount;
-        int totalPoints = (result.overallScore * 10).round();
+        double totalPoints = result.overallScore;
 
         Navigator.pushReplacement(
           context,

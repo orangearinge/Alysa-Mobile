@@ -138,12 +138,12 @@ class _TestHistoryPageState extends State<TestHistoryPage> {
         leading: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: _getScoreColor(score).withOpacity(0.1),
+            color: _getScoreColorHistory(score).withOpacity(0.1),
             shape: BoxShape.circle,
           ),
           child: Icon(
             Icons.history_edu,
-            color: _getScoreColor(score),
+            color: _getScoreColorHistory(score),
             size: 28,
           ),
         ),
@@ -165,13 +165,13 @@ class _TestHistoryPageState extends State<TestHistoryPage> {
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: _getScoreColor(score).withOpacity(0.1),
+            color: _getScoreColorHistory(score).withOpacity(0.1),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
-            "${score.toStringAsFixed(1)}/5.0",
+            "${score.toStringAsFixed(1)}/10.0",
             style: GoogleFonts.poppins(
-              color: _getScoreColor(score),
+              color: _getScoreColorHistory(score),
               fontWeight: FontWeight.bold,
               fontSize: 15,
             ),
@@ -181,9 +181,9 @@ class _TestHistoryPageState extends State<TestHistoryPage> {
     );
   }
 
-  Color _getScoreColor(double score) {
-    if (score >= 4.0) return Colors.green;
-    if (score >= 3.0) return Colors.orange;
+  Color _getScoreColorHistory(double score) {
+    if (score >= 7.5) return Colors.green;
+    if (score >= 6.0) return Colors.orange;
     return Colors.red;
   }
 }

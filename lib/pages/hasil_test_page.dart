@@ -6,7 +6,7 @@ import 'package:alysa_speak/models/test_model.dart';
 class HasilTestPage extends StatelessWidget {
   final int correctAnswers;
   final int wrongAnswers;
-  final int totalPoints;
+  final double totalPoints;
   // Optional: keep questions if needed for other logic, but strictly use result for navigation
   final PracticeTestResult? result;
 
@@ -14,7 +14,7 @@ class HasilTestPage extends StatelessWidget {
     super.key,
     this.correctAnswers = 0,
     this.wrongAnswers = 0,
-    this.totalPoints = 0,
+    this.totalPoints = 0.0,
     this.result,
   });
 
@@ -148,10 +148,10 @@ class HasilTestPage extends StatelessWidget {
 
                 // Points Earned
                 Text(
-                  "You've Earned ${totalPoints}Pts",
+                  "Final Score: ${totalPoints.toStringAsFixed(1)} / 10.0",
                   style: const TextStyle(
                     color: AppColors.primary,
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
