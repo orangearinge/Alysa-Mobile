@@ -5,7 +5,7 @@ class ApiConstants {
   // static const String _localOther = 'http://127.0.0.1:5000/api';
 
   // kalau mau pakai ngrok, tinggal ganti ini
-  static const String _ngrok = 'http://192.168.1.3:5000/api';
+  static const String _ngrok = 'https://firmamental-rosella-vexatious.ngrok-free.dev/api';
 
   static String get baseUrl {
     // ===== PILIH SALAH SATU =====
