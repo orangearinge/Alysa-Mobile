@@ -184,21 +184,59 @@ class _TestMixedPageState extends State<TestMixedPage> {
     }
 
     if (isRecording) {
-      _speech.stop();
+      // Stop recording
+      await _speech.stop();
       setState(() => isRecording = false);
     } else {
+      // Start recording
       setState(() {
         isRecording = true;
-        spokenText = ""; // clear previous
+        spokenText = ""; // Clear only when user starts fresh
       });
-      _speech.listen(
-        onResult: (result) {
-          setState(() {
-            spokenText = result.recognizedWords;
-          });
-        },
-      );
+      _startListening();
     }
+  }
+
+  void _startListening() {
+    _speech.listen(
+      onResult: (result) {
+        if (mounted) {
+          setState(() {
+            // APPEND text, don't replace! Accumulate all sentences
+            if (result.finalResult) {
+              // Sentence finished - add to accumulated text with space
+              if (spokenText.isNotEmpty && !spokenText.endsWith(' ')) {
+                spokenText += ' ';
+              }
+              spokenText += result.recognizedWords;
+            } else {
+              // Partial result - for now just keep accumulated text
+              // User will see next final result added
+            }
+          });
+        }
+
+        // Auto-restart ketika user selesai bicara (finalResult) untuk capture kalimat berikutnya
+        if (result.finalResult && isRecording && mounted) {
+          // Delay minimal untuk seamless restart
+          Future.delayed(const Duration(milliseconds: 100), () {
+            if (isRecording && mounted && _speech.isNotListening) {
+              _startListening(); // Restart immediately for next sentence
+            }
+          });
+        }
+      },
+      listenFor: const Duration(minutes: 5), // Maximum duration per session
+      pauseFor: const Duration(
+        seconds: 2,
+      ), // Short pause tolerance for natural speech
+      partialResults: true, // Real-time feedback
+      onSoundLevelChange: (level) {
+        // Optional: bisa tambah visual feedback sound level
+      },
+      cancelOnError: false,
+      listenMode: stt.ListenMode.dictation, // Best for continuous speech
+    );
   }
 
   @override
@@ -271,182 +309,207 @@ class _TestMixedPageState extends State<TestMixedPage> {
         ),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Question Header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    isWriting ? "Writing" : "Speaking",
-                    style: const TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+        child: Column(
+          children: [
+            // Scrollable Question Area
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Question Header
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          isWriting ? "Writing" : "Speaking",
+                          style: const TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          "${currentQuestionIndex + 1}/${questions.length}",
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 16),
+
+                    // Progress Bar
+                    LinearProgressIndicator(
+                      value: (currentQuestionIndex + 1) / questions.length,
+                      backgroundColor: Colors.grey[300],
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        AppColors.primary,
+                      ),
+                      minHeight: 6,
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Question Text
+                    Text(
+                      currentQuestion.prompt,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Fixed Bottom Input Area
+            Container(
+              padding: const EdgeInsets.all(24.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    spreadRadius: 1,
+                    blurRadius: 5,
+                    offset: const Offset(0, -2),
                   ),
-                  Text(
-                    "${currentQuestionIndex + 1}/${questions.length}",
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Dynamic Input based on question type
+                  if (isWriting) ...[
+                    // Writing Input
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: TextField(
+                        controller: _answerController,
+                        maxLines: 3,
+                        decoration: InputDecoration(
+                          hintText: "Type your Answer ...",
+                          hintStyle: TextStyle(
+                            color: Colors.grey.shade400,
+                            fontSize: 14,
+                          ),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ] else ...[
+                    // Speaking Input (Microphone Button and Live Text)
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        if (spokenText.isNotEmpty)
+                          Container(
+                            margin: const EdgeInsets.only(
+                              bottom: 20,
+                            ), // Tambah margin agar tidak nempel ke mic
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              spokenText,
+                              textAlign:
+                                  TextAlign.center, // Text juga dibuat tengah
+                              style: const TextStyle(
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ),
+
+                        GestureDetector(
+                          onTap: _toggleRecording,
+                          child: Container(
+                            width: 80,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              color: isRecording
+                                  ? Colors.red
+                                  : AppColors.primary,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color:
+                                      (isRecording
+                                              ? Colors.red
+                                              : AppColors.primary)
+                                          .withOpacity(0.3),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              isRecording ? Icons.stop : Icons.mic,
+                              color: Colors.white,
+                              size: 40,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          isRecording ? "Listening..." : "Tap to Speak",
+                          style: TextStyle(
+                            color: isRecording
+                                ? Colors.red
+                                : Colors.grey.shade700,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+
+                  const SizedBox(height: 16),
+
+                  // Next Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: _submitCurrentAnswer,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        isLastQuestion ? "FINISH TEST" : "NEXT QUESTION",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-
-              // Progress Bar
-              LinearProgressIndicator(
-                value: (currentQuestionIndex + 1) / questions.length,
-                backgroundColor: Colors.grey[300],
-                valueColor: const AlwaysStoppedAnimation<Color>(
-                  AppColors.primary,
-                ),
-                minHeight: 6,
-              ),
-              const SizedBox(height: 24),
-
-              // Question Text
-              Text(
-                currentQuestion.prompt,
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.black87,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-
-              const Spacer(),
-
-              // Dynamic Input based on question type
-              if (isWriting) ...[
-                // Writing Input
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: TextField(
-                    controller: _answerController,
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      hintText: "Type your Answer ...",
-                      hintStyle: TextStyle(
-                        color: Colors.grey.shade400,
-                        fontSize: 14,
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                    ),
-                  ),
-                ),
-              ] else ...[
-                // Speaking Input (Microphone Button and Live Text)
-                SizedBox(
-                  width: double
-                      .infinity, // Memastikan area mengambil lebar penuh layar
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      if (spokenText.isNotEmpty)
-                        Container(
-                          margin: const EdgeInsets.only(
-                            bottom: 20,
-                          ), // Tambah margin agar tidak nempel ke mic
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            spokenText,
-                            textAlign:
-                                TextAlign.center, // Text juga dibuat tengah
-                            style: const TextStyle(fontStyle: FontStyle.italic),
-                          ),
-                        ),
-
-                      GestureDetector(
-                        onTap: _toggleRecording,
-                        child: Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            color: isRecording ? Colors.red : AppColors.primary,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color:
-                                    (isRecording
-                                            ? Colors.red
-                                            : AppColors.primary)
-                                        .withOpacity(0.3),
-                                blurRadius: 10,
-                                spreadRadius: 2,
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            isRecording ? Icons.stop : Icons.mic,
-                            color: Colors.white,
-                            size: 40,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        isRecording ? "Listening..." : "Tap to Speak",
-                        style: TextStyle(
-                          color: isRecording
-                              ? Colors.red
-                              : Colors.grey.shade700,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-
-              const SizedBox(height: 24),
-
-              // Next Button (Always visible to force stop/submit)
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _submitCurrentAnswer,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    isLastQuestion ? "FINISH TEST" : "NEXT QUESTION",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
