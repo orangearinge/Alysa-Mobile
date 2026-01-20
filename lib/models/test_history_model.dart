@@ -27,9 +27,18 @@ class TestSessionModel {
       detailsFromFeedback = detailed.map((e) {
         return PracticeResultDetail(
           questionId: e['question_id']?.toString() ?? '',
+          questionPrompt: e['question_text'] ?? '',
           userAnswer: e['user_answer'] ?? '',
           score: (e['score'] ?? 0).toDouble(),
           feedback: List<String>.from(e['feedback'] ?? []),
+          suggestedCorrection: e['suggested_correction'] ?? '',
+          evaluation: (e['evaluation'] is Map)
+              ? (e['evaluation'] as Map).map(
+                  (k, v) => MapEntry(k.toString(), v.toString()),
+                )
+              : {},
+          proTips: List<String>.from(e['pro_tips'] ?? []),
+          referenceAnswer: e['reference_answer'] ?? '',
         );
       }).toList();
     }
@@ -119,9 +128,15 @@ class TestAnswerModel {
 
     return PracticeResultDetail(
       questionId: qId,
+      questionPrompt:
+          "", // History might not have prompt stored in legacy records
       userAnswer: answerText,
       score: score,
       feedback: feedback,
+      suggestedCorrection: "", // Placeholder for history
+      evaluation: {}, // Placeholder for history
+      proTips: [], // Placeholder for history
+      referenceAnswer: "", // Placeholder for history
     );
   }
 }

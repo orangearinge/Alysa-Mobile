@@ -148,7 +148,7 @@ class HasilTestPage extends StatelessWidget {
 
                 // Points Earned
                 Text(
-                  "Final Score: ${totalPoints.toStringAsFixed(1)} / 10.0",
+                  "Final Score: ${totalPoints.toStringAsFixed(1)} / 100",
                   style: const TextStyle(
                     color: AppColors.primary,
                     fontSize: 18,

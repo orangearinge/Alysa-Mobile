@@ -15,8 +15,10 @@ class TestReviewPage extends StatefulWidget {
 class _TestReviewPageState extends State<TestReviewPage> {
   int currentQuestionIndex = 0;
 
-  PracticeResultDetail get currentResult => widget.result.results[currentQuestionIndex];
-  bool get isLastQuestion => currentQuestionIndex >= widget.result.results.length - 1;
+  PracticeResultDetail get currentResult =>
+      widget.result.results[currentQuestionIndex];
+  bool get isLastQuestion =>
+      currentQuestionIndex >= widget.result.results.length - 1;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +31,11 @@ class _TestReviewPageState extends State<TestReviewPage> {
           icon: const FaIcon(FontAwesomeIcons.arrowLeft, color: Colors.black),
           onPressed: () {
             // Navigator.pop(context); // Do not use pop to prevent going back to test
-            Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              '/home',
+              (route) => false,
+            );
           },
         ),
         title: const Text(
@@ -48,31 +54,30 @@ class _TestReviewPageState extends State<TestReviewPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Overall Score Summary
-              if (currentQuestionIndex == 0) ...[
-                 Center(
-                   child: Column(
-                     children: [
-                       Text(
-                         "Overall Score",
-                         style: TextStyle(color: Colors.grey.shade600),
-                       ),
-                       const SizedBox(height: 8),
-                       Text(
-                         "${widget.result.overallScore.toStringAsFixed(1)} / 5.0",
-                         style: const TextStyle(
-                           fontSize: 32,
-                           fontWeight: FontWeight.bold,
-                           color: AppColors.primary
-                         ),
-                       ),
-                       const SizedBox(height: 24),
-                       const Divider(),
-                     ],
-                   ),
-                 )
-              ],
-            
+              // Overall Score Summary (Circular Gauge) - Now always visible
+              Center(
+                child: Column(
+                  children: [
+                    Text(
+                      "Overall Score",
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildScoreGauge(
+                      widget.result.overallScore,
+                      100.0, // Overall score is now out of 100
+                      size: 100,
+                    ),
+                    const SizedBox(height: 24),
+                    const Divider(),
+                  ],
+                ),
+              ),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -84,113 +89,134 @@ class _TestReviewPageState extends State<TestReviewPage> {
                       fontSize: 16,
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: _getScoreColor(currentResult.score).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      children: [
-                        const FaIcon(FontAwesomeIcons.star, size: 14, color: Colors.amber),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${currentResult.score}/5',
-                          style: TextStyle(
-                            color: _getScoreColor(currentResult.score),
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
+                  _buildScoreGauge(
+                    currentResult.score,
+                    9.0, // Per question is band 0-9
+                    size: 45,
                   ),
                 ],
               ),
               const SizedBox(height: 16),
               // Progress bar
               LinearProgressIndicator(
-                value: (currentQuestionIndex + 1) / widget.result.results.length,
+                value:
+                    (currentQuestionIndex + 1) / widget.result.results.length,
                 backgroundColor: Colors.grey[300],
                 valueColor: const AlwaysStoppedAnimation<Color>(
                   AppColors.primary,
                 ),
                 minHeight: 6,
               ),
-              const SizedBox(height: 32),
-              
-              // Helper text for context since we don't have the original prompt here easily
-              // In a real app we might pass the Questions list too, but for now we focus on feedback
-              Text(
-                "Your Answer:",
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.grey.shade300,
-                  ),
-                ),
-                child: Text(
-                  currentResult.userAnswer.isEmpty
-                      ? "(No answer provided)"
-                      : currentResult.userAnswer,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    color: Colors.black87,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              
               const SizedBox(height: 24),
-              Text(
-                "AI Feedback:",
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.blue.shade200,
-                  ),
+
+              // Question Prompt
+              if (currentResult.questionPrompt.isNotEmpty) ...[
+                _buildSectionTitle("Question:", null),
+                const SizedBox(height: 8),
+                _buildTextContainer(
+                  currentResult.questionPrompt,
+                  Colors.blue.shade50,
+                  Colors.blue.shade100,
+                  Colors.blue.shade900,
+                  isBold: true,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: currentResult.feedback.map((f) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.only(top: 6.0),
-                          child: Icon(Icons.circle, size: 6, color: Colors.blue),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            f,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.blue.shade900,
-                              height: 1.4,
+                const SizedBox(height: 24),
+              ],
+
+              // Your Answer
+              _buildSectionTitle("Your Answer:", null),
+              const SizedBox(height: 8),
+              _buildTextContainer(
+                currentResult.userAnswer.isEmpty
+                    ? "(No answer provided)"
+                    : currentResult.userAnswer,
+                Colors.grey.shade50,
+                Colors.grey.shade300,
+                Colors.black87,
+              ),
+
+              const SizedBox(height: 24),
+
+              // Suggested Correction
+              if (currentResult.suggestedCorrection.isNotEmpty) ...[
+                _buildSectionTitle("Suggested Correction: ✨", null),
+                const SizedBox(height: 8),
+                _buildTextContainer(
+                  currentResult.suggestedCorrection,
+                  Colors.amber.shade50,
+                  Colors.amber.shade200,
+                  Colors.brown.shade900,
+                  isItalic: true,
+                ),
+                const SizedBox(height: 24),
+              ],
+
+              // Detailed Evaluation
+              _buildSectionTitle("Detailed Evaluation:", null),
+              const SizedBox(height: 12),
+              _buildEvaluationGrid(currentResult.evaluation),
+
+              const SizedBox(height: 24),
+
+              // Pro Tips
+              if (currentResult.proTips.isNotEmpty) ...[
+                _buildSectionTitle("Pro Tips to Level Up: 💡", null),
+                const SizedBox(height: 8),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.blue.shade100),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: currentResult.proTips
+                        .map(
+                          (tip) => Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "• ",
+                                  style: TextStyle(
+                                    color: Colors.blue.shade800,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    tip,
+                                    style: TextStyle(
+                                      color: Colors.blue.shade900,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  )).toList(),
+                        )
+                        .toList(),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 24),
+              ],
+
+              // Band 8+ Reference
+              if (currentResult.referenceAnswer.isNotEmpty) ...[
+                _buildSectionTitle("Band 8+ Reference: 🏆", null),
+                const SizedBox(height: 8),
+                _buildTextContainer(
+                  currentResult.referenceAnswer,
+                  Colors.green.shade50,
+                  Colors.green.shade200,
+                  Colors.green.shade900,
+                ),
+                const SizedBox(height: 24),
+              ],
 
               const SizedBox(height: 32),
               // Tombol manual untuk next/finish
@@ -201,7 +227,11 @@ class _TestReviewPageState extends State<TestReviewPage> {
                   onPressed: () {
                     if (isLastQuestion) {
                       // Kembali ke home
-                      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        '/home',
+                        (route) => false,
+                      );
                     } else {
                       // Lanjut ke soal berikutnya
                       setState(() {
@@ -234,9 +264,158 @@ class _TestReviewPageState extends State<TestReviewPage> {
     );
   }
 
-  Color _getScoreColor(double score) {
-    if (score >= 4.0) return Colors.green;
-    if (score >= 3.0) return Colors.orange;
+  Widget _buildScoreGauge(double score, double maxScore, {double size = 60}) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        SizedBox(
+          width: size,
+          height: size,
+          child: CircularProgressIndicator(
+            value: score / maxScore,
+            strokeWidth: size * 0.1,
+            backgroundColor: Colors.grey.shade200,
+            valueColor: AlwaysStoppedAnimation<Color>(
+              _getScoreColor(score, maxScore),
+            ),
+          ),
+        ),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              score.toStringAsFixed(1),
+              style: TextStyle(
+                fontSize: size * 0.25,
+                fontWeight: FontWeight.bold,
+                color: _getScoreColor(score, maxScore),
+              ),
+            ),
+            Text(
+              "/${maxScore.toInt()}",
+              style: TextStyle(
+                fontSize: size * 0.15,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey.shade500,
+                height: 0.8,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSectionTitle(String title, IconData? icon) {
+    return Row(
+      children: [
+        if (icon != null) ...[
+          FaIcon(icon, size: 16, color: AppColors.primary),
+          const SizedBox(width: 8),
+        ],
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextContainer(
+    String text,
+    Color bgColor,
+    Color borderColor,
+    Color textColor, {
+    bool isItalic = false,
+    bool isBold = false,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 14,
+          color: textColor,
+          fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
+          fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+          height: 1.5,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEvaluationGrid(Map<String, String> evaluation) {
+    final items = [
+      {'title': '🎯 Relevance', 'key': 'relevance'},
+      {'title': '🔗 Coherence', 'key': 'coherence'},
+      {'title': '📚 Vocab', 'key': 'vocabulary'},
+      {'title': '✍️ Grammar', 'key': 'grammar'},
+    ];
+
+    return Column(
+      children: items.map((item) {
+        final content = evaluation[item['key']];
+        if (content == null || content.isEmpty || content == 'N/A') {
+          return const SizedBox.shrink();
+        }
+
+        return Container(
+          width: double.infinity,
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade200),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                item['title']!,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                content,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.grey.shade800,
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Color _getScoreColor(double score, double maxScore) {
+    double percentage = score / maxScore;
+    if (percentage >= 0.7) return Colors.green;
+    if (percentage >= 0.5) return Colors.orange;
     return Colors.red;
   }
 }

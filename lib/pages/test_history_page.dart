@@ -169,7 +169,7 @@ class _TestHistoryPageState extends State<TestHistoryPage> {
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
-            "${score.toStringAsFixed(1)}/10.0",
+            "${score.toStringAsFixed(1)}/100",
             style: GoogleFonts.poppins(
               color: _getScoreColorHistory(score),
               fontWeight: FontWeight.bold,
@@ -182,8 +182,8 @@ class _TestHistoryPageState extends State<TestHistoryPage> {
   }
 
   Color _getScoreColorHistory(double score) {
-    if (score >= 7.5) return Colors.green;
-    if (score >= 6.0) return Colors.orange;
+    if (score >= 70.0) return Colors.green;
+    if (score >= 50.0) return Colors.orange;
     return Colors.red;
   }
 }
